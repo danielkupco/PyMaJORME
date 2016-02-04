@@ -1,6 +1,5 @@
 import os
 import pymajorme_config
-from textx.metamodel import metamodel_from_file
 from textx.export import metamodel_export, model_export
 import generators.entity as entity_mm
 import generators.entity_gen as entity_gen
@@ -17,11 +16,6 @@ def load_model(file_name):
     if not os.path.exists(visualization_dir):
         os.makedirs(visualization_dir)
 
-    # jorm_mm = metamodel_from_file(os.path.join(current_dir, 'languages', 'pymajorme_language.tx'))
-    # jorm_mm = metamodel_from_file(os.path.join(current_dir, 'languages', 'pymajorme_language.tx',
-    #                                 classes=[Entity],  # Register Entity class
-    #                                 builtins=entity_builtins,
-    #                                 debug=False))
     jorm_mm = entity_mm.get_entity_mm()
 
     metamodel_export(jorm_mm, os.path.join(visualization_dir, 'jorm_metamodel.dot'))
