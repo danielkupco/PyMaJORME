@@ -11,3 +11,5 @@ entity ElementType {
     name : string
     description : string
 }
+
+ElementType -> Element
