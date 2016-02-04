@@ -1,0 +1,9 @@
+// This is the referent example
+
+entity Element {
+    id : integer
+    name : string
+    description : string
+    parent : Element
+    subElements : Element as set
+}
