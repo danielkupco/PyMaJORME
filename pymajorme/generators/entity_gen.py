@@ -41,21 +41,3 @@ def generate(model):
         # For each entity generate java file
         with open(os.path.join(pymajorme_config.GEN_DIR, "%s.java" % entity.name.capitalize()), 'w') as f:
             f.write(rendered)
-    #
-    # for entity in entities:
-    #     part_pl = entity.namePiece.partname.lower() + pymajorme_config.PLURAL
-    #     part_dir = os.path.join(pymajorme_config.GEN_DIR, part_pl)
-    #     if not os.path.exists(part_dir):
-    #         os.makedirs(part_dir)
-    #
-    #     env = Environment(trim_blocks=True, lstrip_blocks=True, loader=PackageLoader(pymajorme_config.TEMPLATES_DIR, '.'))
-    #     template = env.get_template(TEMPLATE_NAME)
-    #     rendered = template.render({'ModuleName': part_pl.capitalize(),
-    #                                 'DBName': part_pl,
-    #                                 'PartNamePlural': part_pl,
-    #                                 'PartNameSingular': entity.namePiece.partname.lower()})
-    #
-    #     file_name = os.path.join(part_dir, TEMPLATE_NAME)
-    #     with open(file_name, "w+") as f:
-    #         f.write(rendered)
-    #         print(mean_gen_config.GENERATED_MESSAGE + file_name)
