@@ -4,6 +4,10 @@ entity Element {
     id : integer
     name : string
     description : string
-    parent : Element
-    subElements : Element as set
+}
+
+entity ElementType {
+    id : integer
+    name : string
+    description : string
 }

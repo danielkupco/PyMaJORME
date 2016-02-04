@@ -14,8 +14,12 @@ Entity:
     '}'
 ;
 
+JavaType:
+    name=ID
+;
+
 Attribute:
-    name=ID ':' type=[Entity] ('as' Collection)?
+    name=ID ':' type=[JavaType] ('as' collection=Collection)?
 ;
 
 Collection:
