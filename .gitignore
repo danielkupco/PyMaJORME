@@ -1,5 +1,10 @@
-#Compiled files
+# Compiled files
 **/.pyc
+**/__pycache__/
+
+# Generated files
+**/visualization/
+**/orm_gen/
 
 # PyCharm files
 .idea/
