@@ -1,0 +1,28 @@
+/*
+  This is a textX specification of pymajorme_language.tx DSL for generating ORM layer for Java applications.
+  Authors: Rade Radišić <radisic DOT rade AT gmail DOT com>
+           Daniel Kupčo <kupcodandroid AT gmail DOT com>
+*/
+
+ORModel:
+    entities+=Entity
+;
+
+Entity:
+    'entity' name=ID '{'
+        attributes+=Attribute
+    '}'
+;
+
+Attribute:
+    name=ID ':' type=[Entity] ('as' Collection)?
+;
+
+Collection:
+    'set' | 'list' | 'map'
+;
+
+// Special rule for comments. Comments start with //
+Comment:
+  /\/\/.*$/
+;
