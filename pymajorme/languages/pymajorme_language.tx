@@ -6,6 +6,7 @@
 
 ORModel:
     entities+=Entity
+    relationships+=Relation
 ;
 
 Entity:
@@ -20,6 +21,14 @@ Attribute:
 
 Collection:
     'set' | 'list' | 'map'
+;
+
+Relation:
+    source=[Entity] RelationType destination=[Entity]
+;
+
+RelationType:
+    '->' | '<->' | '--' 
 ;
 
 // Special rule for comments. Comments start with //
