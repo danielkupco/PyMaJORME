@@ -1,21 +1,35 @@
 import os
 import pymajorme_config
 import jinja2
-import generators.entity as entity
-
+import generators.javatype as javatype
+import datetime
 TEMPLATE_NAME = "entity.html"
 
-def javatype(s):
+def filter_javatype(s):
         """
-        Maps type names from Entity to Java.
+        Maps type names from model to Java.
         """
-        if isinstance(s, entity.Entity):
+        if isinstance(s, javatype.JavaType):
             s = s.name
 
         return {
                 'integer': 'Integer',
                 'string': 'String'
         }.get(s, s)
+
+def filter_collectionGeneric(collection):
+        return {
+                'list': 'List',
+                'set': 'Set',
+                'map': 'Map'
+        }.get(collection, collection)
+
+def filter_collectionConcrete(collection):
+        return {
+                'list': 'ArrayList',
+                'set': 'HashSet',
+                'map': 'HashMap'
+        }.get(collection, collection)
 
 def generate(model):
 
@@ -31,13 +45,18 @@ def generate(model):
                 pymajorme_config.TEMPLATES_DIR))))
 
     # Register filter for mapping Entity type names to Java type names.
-    jinja_env.filters['javatype'] = javatype
+    jinja_env.filters['javatype'] = filter_javatype
+    jinja_env.filters['collectionGeneric'] = filter_collectionGeneric
+    jinja_env.filters['collectionConcrete'] = filter_collectionConcrete
 
     # Load Java template
     template = jinja_env.get_template('java.template')
 
+    date = datetime.datetime.now().strftime("%d.%m.%Y. %H:%M:%S")
+
     for entity in entities:
-        rendered = template.render({'entity': entity})
+        rendered = template.render({'entity': entity,
+                                    'date': date})
         # For each entity generate java file
         with open(os.path.join(pymajorme_config.GEN_DIR, "%s.java" % entity.name.capitalize()), 'w') as f:
             f.write(rendered)
