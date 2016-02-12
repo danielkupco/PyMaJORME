@@ -50,11 +50,21 @@ def generate(model):
     jinja_env.filters['collectionConcrete'] = filter_collectionConcrete
 
     # Load Java template
-    template = jinja_env.get_template('java.template')
+    template = jinja_env.get_template('entity.template')
 
     date = datetime.datetime.now().strftime("%d.%m.%Y. %H:%M:%S")
 
     for entity in entities:
+
+        # for attr in entity.attributes:
+        #     print("atribut {}:".format(attr.name))
+        #     if hasattr(attr, 'column_parameters'):
+        #         for prm in attr.column_parameters:
+        #             if hasattr(prm, 'value'):
+        #                 print("param name:{} and value:{}".format(prm.name, prm.value))
+        #             else:
+        #                 print("param name:{}".format(prm.name))
+
         rendered = template.render({'entity': entity,
                                     'date': date})
         # For each entity generate java file
