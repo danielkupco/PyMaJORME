@@ -1,5 +1,7 @@
 // This is the referent example
 
+package model.entity
+
 entity Element {
     Integer id : GUID, name=id
     String name : unique=true, nullable=false

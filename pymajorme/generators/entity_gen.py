@@ -5,33 +5,43 @@ import generators.javatype as javatype
 import datetime
 TEMPLATE_NAME = "entity.html"
 
-def filter_javatype(s):
-        """
-        Maps type names from model to Java.
-        """
-        if isinstance(s, javatype.JavaType):
-            s = s.name
 
-        return {
-                'integer': 'Integer',
-                'string': 'String'
-        }.get(s, s)
+imports = []
+
+def filter_javatype(s):
+    """
+    Maps type names from model to Java.
+    """
+    if isinstance(s, javatype.JavaType):
+        s = s.name
+
+    return {
+            'integer': 'Integer',
+            'string': 'String'
+    }.get(s, s)
 
 def filter_collectionGeneric(collection):
-        return {
-                'list': 'List',
-                'set': 'Set',
-                'map': 'Map'
-        }.get(collection, collection)
+    collection_map = {'list': 'List',
+                      'set': 'Set',
+                      'map': 'Map'}
+    prefix = "java.util."
+    imports.append(prefix + collection_map.get(collection, collection))
+    return collection_map.get(collection, collection)
 
 def filter_collectionConcrete(collection):
-        return {
-                'list': 'ArrayList',
-                'set': 'HashSet',
-                'map': 'HashMap'
-        }.get(collection, collection)
+    collection_map = {'list': 'ArrayList',
+                      'set': 'HashSet',
+                      'map': 'HashMap'}
+    prefix = "java.util."
+    imports.append(prefix + collection_map.get(collection, collection))
+    return collection_map.get(collection, collection)
 
 def generate(model):
+
+    imports.append("java.io.Serializable")
+    imports.append("javax.persistence.Column")
+    imports.append("javax.persistence.Entity")
+    imports.append("javax.persistence.Table")
 
     entities = model.entities
 
@@ -66,7 +76,10 @@ def generate(model):
         #                 print("param name:{}".format(prm.name))
 
         rendered = template.render({'entity': entity,
-                                    'date': date})
+                                    'date': date,
+                                    'package': model.package.name,
+                                    'imports': imports})
+
         # For each entity generate java file
         with open(os.path.join(pymajorme_config.GEN_DIR, "%s.java" % entity.name.capitalize()), 'w') as f:
             f.write(rendered)

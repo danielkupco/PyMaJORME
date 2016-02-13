@@ -5,8 +5,13 @@
 */
 
 ORModel:
+    package=Package
     entities+=Entity
     relationships+=Relation
+;
+
+Package:
+    'package' name=/(\w+\.)*(\w+)/
 ;
 
 Entity:
