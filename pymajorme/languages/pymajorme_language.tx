@@ -20,7 +20,7 @@ JavaType:
 ;
 
 Attribute:
-    name=ID ':' type=[JavaType] ('as' collection=Collection)?
+    type=[JavaType] name=ID ('as' collection=Collection)? (':' column_parameters*=DBColumnParameter[','])?
 ;
 
 Collection:
@@ -33,6 +33,30 @@ Relation:
 
 RelationType:
     '->' | '<->' | '--' 
+;
+
+DBColumnParameter:
+    ColGUID | ColName | ColUnique | ColNullable
+;
+
+ColGUID:
+    name='GUID'
+;
+
+ColName:
+    name='name' '=' value=ID
+;
+
+ColUnique:
+    name='unique' '=' value=TrueFalse
+;
+
+ColNullable:
+    name='nullable' '=' value=TrueFalse
+;
+
+TrueFalse:
+    'true' | 'false'
 ;
 
 // Special rule for comments. Comments start with //

@@ -1,15 +1,15 @@
 // This is the referent example
 
 entity Element {
-    id : integer
-    name : string
-    description : string
+    Integer id : GUID, name=id
+    String name : unique=true, nullable=false
+    String description : nullable=true
 }
 
 entity ElementType {
-    id : integer
-    name : string
-    description : string
+    Integer id : GUID
+    String name : nullable = false, unique=true
+    String description
 }
 
 ElementType -> Element
