@@ -3,8 +3,8 @@ import pymajorme_config
 import jinja2
 import generators.javatype as javatype
 import datetime
-TEMPLATE_NAME = 'entity.html'
 
+TEMPLATE_NAME = 'entity.template'
 imports = []
 
 
@@ -51,10 +51,6 @@ def generate(model):
 
     entities = model.entities
 
-    # Create output folder
-    if not os.path.exists(pymajorme_config.GEN_DIR):
-        os.mkdir(pymajorme_config.GEN_DIR)
-
     # Initialize template engine.
     jinja_env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True,
         loader=jinja2.FileSystemLoader(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -66,7 +62,7 @@ def generate(model):
     jinja_env.filters['collectionConcrete'] = filter_collection_concrete
 
     # Load Java template
-    template = jinja_env.get_template('entity.template')
+    template = jinja_env.get_template(TEMPLATE_NAME)
 
     date = datetime.datetime.now().strftime('%d.%m.%Y. %H:%M:%S')
 
@@ -86,5 +82,5 @@ def generate(model):
                                     'imports': imports})
 
         # For each entity generate java file
-        with open(os.path.join(pymajorme_config.GEN_DIR, '%s.java' % entity.name.capitalize()), 'w') as f:
+        with open(os.path.join(pymajorme_config.GEN_DIR, '%s.java' % entity.name), 'w') as f:
             f.write(rendered)

@@ -1,6 +1,6 @@
 // This is the referent example
 
-package model.entity
+package pymagen.model
 
 entity Element {
     Integer id : GUID, name=id

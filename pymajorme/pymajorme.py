@@ -4,6 +4,7 @@ from textx.metamodel import metamodel_from_file
 from textx.export import metamodel_export, model_export
 import generators.javatype as javatype
 import generators.entity_gen as entity_gen
+import generators.dao_gen as dao_gen
 
 
 def load_model(file_name):
@@ -35,10 +36,15 @@ def load_model(file_name):
 current_dir = os.getcwd()
 gen_dir = os.path.join(current_dir, pymajorme_config.GEN_DIR)
 
-if not os.path.exists(gen_dir):
-    os.makedirs(gen_dir)
+
+# Create output folder
+if not os.path.exists(pymajorme_config.GEN_DIR):
+    os.mkdir(pymajorme_config.GEN_DIR)
 
 model = load_model('entities.jorm')
+
+# passing model to specific generators
 entity_gen.generate(model)
+dao_gen.generate(model)
 
 
