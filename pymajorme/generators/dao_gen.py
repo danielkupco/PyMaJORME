@@ -15,7 +15,7 @@ def add_import(value):
         imports.append(value)
 
 
-def generate(model):
+def generate(model, package_path):
 
     entities = model.entities
 
@@ -33,15 +33,20 @@ def generate(model):
 
     date = datetime.datetime.now().strftime('%d.%m.%Y. %H:%M:%S')
 
+    # Create dao directory
+    package_path = os.path.join(package_path, 'dao')
+    if not os.path.exists(package_path):
+        os.mkdir(package_path)
+
     # Generic dao
     generic_dao_class_rendered = generic_dao_class_template.render({'package': model.package.name,
                                                                     'date': date})
     generic_dao_interface_rendered = generic_dao_interface_template.render({'package': model.package.name,
                                                                             'date': date})
     # generate java file
-    with open(os.path.join(pymajorme_config.GEN_DIR, 'GenericDao.java'), 'w') as f:
+    with open(os.path.join(package_path, 'GenericDao.java'), 'w') as f:
         f.write(generic_dao_class_rendered)
-    with open(os.path.join(pymajorme_config.GEN_DIR, 'IGenericDao.java'), 'w') as f:
+    with open(os.path.join(package_path, 'IGenericDao.java'), 'w') as f:
         f.write(generic_dao_interface_rendered)
 
     id_type = ''
@@ -69,8 +74,8 @@ def generate(model):
                                                         'package': model.package.name})
 
         # For each entity generate java file
-        with open(os.path.join(pymajorme_config.GEN_DIR, '{}Dao.java'.format(entity.name)), 'w') as f:
+        with open(os.path.join(package_path, '{}Dao.java'.format(entity.name)), 'w') as f:
             f.write(class_rendered)
 
-        with open(os.path.join(pymajorme_config.GEN_DIR, 'I{}Dao.java'.format(entity.name)), 'w') as f:
+        with open(os.path.join(package_path, 'I{}Dao.java'.format(entity.name)), 'w') as f:
             f.write(interface_rendered)
