@@ -42,7 +42,7 @@ def filter_collection_concrete(collection):
     return collection_map.get(collection, collection)
 
 
-def generate(model):
+def generate(model, package_path):
 
     imports.append('java.io.Serializable')
     imports.append('javax.persistence.Entity')
@@ -64,6 +64,11 @@ def generate(model):
     # Load Java template
     template = jinja_env.get_template(TEMPLATE_NAME)
 
+    # Create entity directory
+    package_path = os.path.join(package_path, 'entity')
+    if not os.path.exists(package_path):
+        os.mkdir(package_path)
+
     date = datetime.datetime.now().strftime('%d.%m.%Y. %H:%M:%S')
 
     for entity in entities:
@@ -82,5 +87,5 @@ def generate(model):
                                     'imports': imports})
 
         # For each entity generate java file
-        with open(os.path.join(pymajorme_config.GEN_DIR, '%s.java' % entity.name), 'w') as f:
+        with open(os.path.join(package_path, '{}.java'.format(entity.name)), 'w') as f:
             f.write(rendered)
