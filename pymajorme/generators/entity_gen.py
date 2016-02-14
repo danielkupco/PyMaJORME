@@ -1,7 +1,7 @@
 import os
 import pymajorme_config
 import jinja2
-import generators.javatype as javatype
+import helpers.javatype as javatype
 import datetime
 
 TEMPLATE_NAME = 'entity.template'

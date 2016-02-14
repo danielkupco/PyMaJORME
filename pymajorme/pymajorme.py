@@ -2,7 +2,7 @@ import os
 import pymajorme_config
 from textx.metamodel import metamodel_from_file
 from textx.export import metamodel_export, model_export
-import generators.javatype as javatype
+import helpers.javatype as javatype
 import generators.entity_gen as entity_gen
 import generators.dao_gen as dao_gen
 
