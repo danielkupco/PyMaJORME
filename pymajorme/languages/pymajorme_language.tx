@@ -6,7 +6,7 @@
 
 ORModel:
     entities+=Entity
-    relationships+=Relation
+    relations+=Relation
 ;
 
 Entity:
@@ -28,7 +28,7 @@ Collection:
 ;
 
 Relation:
-    source=[Entity] RelationType destination=[Entity]
+    source=[Entity] relation_type=RelationType destination=[Entity]
 ;
 
 RelationType:

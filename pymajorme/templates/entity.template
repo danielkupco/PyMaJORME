@@ -32,8 +32,25 @@ public class {{entity.name}} implements Serializable {
     {% else %}
     private {{attribute.type.name|javatype}} {{attribute.name}};
     {% endif %}
+    {% endfor %}
+
+    {% for r in internal_single %}
+    private {{ r.source.name }} {{ r.source.name|lower }};
 
     {% endfor %}
+    {% for r in internal_collection %}
+    private List<{{ r.source.name }}> {{ r.source.name|lower }}s;
+
+    {% endfor %}
+    {% for r in external_single %}
+    private {{ r.destination.name }} {{ r.destination.name|lower }};
+
+    {% endfor %}
+    {% for r in external_collection %}
+    private List<{{ r.destination.name }}> {{ r.destination.name|lower }}s;
+
+    {% endfor %}
+
     public {{entity.name}}() {
         // DO NOT EDIT! Empty constructor must exist!
         // One can add other constructors with parameters...

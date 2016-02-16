@@ -31,6 +31,12 @@ def filter_collectionConcrete(collection):
                 'map': 'HashMap'
         }.get(collection, collection)
 
+def filter_relations(entity_name, relations, node_filter, relation_type_filter):
+    '''Filter out relations using lambda expressions for source/destination relations and relationship types'''
+
+    return [r for r in relations if node_filter(entity_name, r) and relation_type_filter(r.relation_type)]
+    
+
 def generate(model):
 
     entities = model.entities
@@ -56,6 +62,10 @@ def generate(model):
 
     for entity in entities:
 
+        relations = model.relations
+
+        source_filter = lambda entity_name, r: entity_name == r.source.name
+        destination_filter = lambda entity_name, r: entity_name == r.destination.name
         # for attr in entity.attributes:
         #     print("atribut {}:".format(attr.name))
         #     if hasattr(attr, 'column_parameters'):
@@ -66,6 +76,10 @@ def generate(model):
         #                 print("param name:{}".format(prm.name))
 
         rendered = template.render({'entity': entity,
+                                    'internal_single' : filter_relations(entity.name, relations, destination_filter, lambda rt: rt == '--' or rt == '->'),
+                                    'internal_collection' : filter_relations(entity.name, relations, destination_filter, lambda rt: rt == '<->'),
+                                    'external_single' : filter_relations(entity.name, relations, source_filter, lambda rt: rt == '--'),
+                                    'external_collection' : filter_relations(entity.name, relations, source_filter, lambda rt: rt == '->' or rt == '<->'),
                                     'date': date})
         # For each entity generate java file
         with open(os.path.join(pymajorme_config.GEN_DIR, "%s.java" % entity.name.capitalize()), 'w') as f:
