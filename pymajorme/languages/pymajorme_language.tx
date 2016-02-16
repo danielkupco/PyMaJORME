@@ -28,7 +28,7 @@ Collection:
 ;
 
 Relation:
-    source=[Entity] RelationType destination=[Entity]
+    source=[Entity] relation_type=RelationType destination=[Entity]
 ;
 
 RelationType:

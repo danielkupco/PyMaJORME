@@ -34,6 +34,11 @@ public class {{entity.name}} implements Serializable {
     {% endif %}
 
     {% endfor %}
+
+    {%- for r in external_collections -%}
+        private List<{{ r.destination.name }}> {{ r.destination.name|lower }};
+    {% endfor %}
+
     public {{entity.name}}() {
         // DO NOT EDIT! Empty constructor must exist!
         // One can add other constructors with parameters...
