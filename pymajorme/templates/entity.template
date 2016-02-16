@@ -52,8 +52,14 @@ public class {{entity.name}} implements Serializable {
     private {{ r.destination.name }} {{ r.destination.name|lower }};
 
     {% endfor %}
-    {% for r in external_collection %}
-    private List<{{ r.destination.name }}> {{ r.destination.name|lower }}s;
+    {% for r in relations|destination(entity) %}
+    @{{ r.relation_type|destination_types }}
+    private {{ r.source.name|destination_attribute(r.relation_type) }};
+
+    {% endfor %}
+    {% for r in relations|source(entity) %}
+    @{{ r.relation_type|source_types }}
+    private {{ r.destination.name|source_attribute(r.relation_type) }}; 
 
     {% endfor %}
 
