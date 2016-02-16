@@ -12,4 +12,6 @@ entity ElementType {
     String description
 }
 
+ElementType -- Element
 ElementType -> Element
+ElementType <-> Element

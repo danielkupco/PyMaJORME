@@ -6,7 +6,7 @@
 
 ORModel:
     entities+=Entity
-    relationships+=Relation
+    relations+=Relation
 ;
 
 Entity:
