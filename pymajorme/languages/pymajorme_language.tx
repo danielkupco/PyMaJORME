@@ -32,6 +32,8 @@ Collection:
     'set' | 'list' | 'map'
 ;
 
+// Relations
+
 Relation:
     source=[Entity] ('['source_name=ID']')? relation_type=RelationType destination=[Entity] ('['destination_name=ID']')? (':' column_parameters*=FKColumnParameter[','])? 
 ;
@@ -39,6 +41,8 @@ Relation:
 RelationType:
     '->' | '<->' | '--' 
 ;
+
+// Database column attributes
 
 DBColumnParameter:
     ColGUID | ColName | ColUnique | ColNullable

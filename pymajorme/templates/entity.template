@@ -21,6 +21,7 @@ import {{import}};
 @SuppressWarnings("serial")
 public class {{entity.name}} implements Serializable {
 
+    {# Generating class attributes #}
     {% for attribute in entity.attributes %}
     {# da li postoji atribut ciji je name=GUID, posto se vraca generator pretvara se u listu #}
     {% if attribute.column_parameters|selectattr("name", "equalto", "GUID")|list|count > 0 %}
@@ -38,10 +39,19 @@ public class {{entity.name}} implements Serializable {
     {% else %}
     private {{attribute.type.name|javatype}} {{attribute.name}};
     {% endif %}
-    {% endfor %}
+
+    {% endfor -%}
 
     {% for r in relations|destination(entity) %}
-    @{{ r.relation_type|destination_types }}(
+    @{{ r.relation_type|destination_types }}
+    {#- JoinColumn annotation #}
+    {%- if "ManyTo" in r.relation_type|destination_types %}
+
+    @JoinColumn(
+    {%- else -%}
+    (
+    {%- endif %}
+    {#- ################### -#}
     {%- for parameter in r.column_parameters|selectattr("value", "defined") -%}
     {{ parameter.name }} = {{ parameter.value }}{{ ', ' }}
     {%- endfor -%}
@@ -50,7 +60,15 @@ public class {{entity.name}} implements Serializable {
 
     {% endfor %}
     {% for r in relations|source(entity) %}
-    @{{ r.relation_type|source_types }}(
+    @{{ r.relation_type|source_types }}
+    {#- JoinColumn annotation #}
+    {%- if "ManyTo" in r.relation_type|destination_types %}
+
+    @JoinColumn(
+    {%- else -%}
+    (
+    {%- endif %}
+    {#- ################### -#}
     {%- for parameter in r.column_parameters|selectattr("value", "defined") -%}
     {{ parameter.name }} = {{ parameter.value }}{{ ', ' }}
     {%- endfor -%}
