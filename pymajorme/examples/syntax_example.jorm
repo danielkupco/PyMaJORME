@@ -1,0 +1,18 @@
+// This is the alternative syntax example
+
+package pymagen.model
+
+entity Element {
+    Integer id [ GUID, name=id ]
+    String name [ unique=true, nullable=false ]
+    String description [ nullable=true ]
+}
+
+entity ElementType {
+    Integer id [ GUID ]
+    String name [ nullable = false, unique=true ]
+    String description
+}
+
+ElementType as tuturututu [ cascade = ALL, fetch = LAZY ] -> Element<list> as mumumumu [ cascade = ALL, fetch = LAZY ]
+ElementType<set> as elementTypes [ cascade = REMOVE, fetch = EAGER ] <-> Element<set> as elements [cascade = PERSIST, fetch = EAGER]
