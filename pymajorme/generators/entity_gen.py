@@ -39,11 +39,43 @@ def filter_collection_concrete(collection):
     add_import('java.util.' + collection_map.get(collection, collection))
     return collection_map.get(collection, collection)
 
-def filter_relations(entity_name, relations, node_filter, relation_type_filter):
-    '''Filter out relations using lambda expressions for source/destination relations and relationship types'''
+def filter_source_types(relation_type):
+    relation_types = {'->' : 'OneToMany',
+                      '<->': 'ManyToMany',
+                      '--' : 'OneToOne'}
 
-    return [r for r in relations if node_filter(entity_name, r) and relation_type_filter(r.relation_type)]
-    
+    add_import('javax.persistence.' + relation_types[relation_type])
+    return relation_types[relation_type]
+
+def filter_destination_types(relation_type):
+    relation_types = {'->' : 'ManyToOne',
+                      '<->': 'ManyToMany',
+                      '--' : 'OneToOne'}
+
+    add_import('javax.persistence.' + relation_types[relation_type])
+    return relation_types[relation_type]
+
+def filter_source_attribute(name, relation_type):
+    relation_types = {'->' : collection(name),
+                      '<->': collection(name),
+                      '--' : single(name)}
+
+    return relation_types[relation_type]
+
+def filter_destination_attribute(name, relation_type):
+    relation_types = {'->' : single(name),
+                      '<->': collection(name),
+                      '--' : single(name)}
+
+    return relation_types[relation_type]
+
+def single(name):
+    decapitalize = lambda s: s[0].lower() + s[1:]
+    return name + ' ' + decapitalize(name)
+
+def collection(name):
+    decapitalize = lambda s: s[0].lower() + s[1:]
+    return 'List<' + name + '> ' + decapitalize(name) + 's'  
 
 def generate(model, package_path):
 
@@ -63,6 +95,12 @@ def generate(model, package_path):
     jinja_env.filters['javatype'] = filter_javatype
     jinja_env.filters['collectionGeneric'] = filter_collection_generic
     jinja_env.filters['collectionConcrete'] = filter_collection_concrete
+    jinja_env.filters['source_types'] = filter_source_types
+    jinja_env.filters['destination_types'] = filter_destination_types
+    jinja_env.filters['source'] = lambda relations, entity: [r for r in relations if entity.name == r.source.name]
+    jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.name]
+    jinja_env.filters['source_attribute'] = filter_source_attribute
+    jinja_env.filters['destination_attribute'] = filter_destination_attribute
 
     # Load Java template
     template = jinja_env.get_template(TEMPLATE_NAME)
@@ -90,10 +128,7 @@ def generate(model, package_path):
                         add_import('static javax.persistence.GenerationType.IDENTITY')
 
         rendered = template.render({'entity': entity,
-                                    'internal_single' : filter_relations(entity.name, relations, destination_filter, lambda rt: rt == '--' or rt == '->'),
-                                    'internal_collection' : filter_relations(entity.name, relations, destination_filter, lambda rt: rt == '<->'),
-                                    'external_single' : filter_relations(entity.name, relations, source_filter, lambda rt: rt == '--'),
-                                    'external_collection' : filter_relations(entity.name, relations, source_filter, lambda rt: rt == '->' or rt == '<->'),
+                                    'relations': relations,
                                     'date': date,
                                     'package': model.package.name,
                                     'imports': imports})

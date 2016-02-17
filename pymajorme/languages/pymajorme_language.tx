@@ -33,7 +33,7 @@ Collection:
 ;
 
 Relation:
-    source=[Entity] relation_type=RelationType destination=[Entity]
+    source=[Entity] ('['source_name=ID']')? relation_type=RelationType destination=[Entity] ('['destination_name=ID']')? (':' column_parameters*=FKColumnParameter[','])? 
 ;
 
 RelationType:
@@ -42,6 +42,10 @@ RelationType:
 
 DBColumnParameter:
     ColGUID | ColName | ColUnique | ColNullable
+;
+
+FKColumnParameter:
+    Cascade | Fetch
 ;
 
 ColGUID:
@@ -62,6 +66,22 @@ ColNullable:
 
 TrueFalse:
     'true' | 'false'
+;
+
+Cascade:
+    name='cascade' '=' value=CascadeValues
+;
+
+CascadeValues:
+    'ALL' | 'DETACH' | 'MERGE' | 'PERSIST' | 'REFRESH' | 'REMOVE'
+;
+
+Fetch:
+    name='fetch' '=' value=FetchValues
+;
+
+FetchValues:
+    'LAZY' | 'EAGER'
 ;
 
 // Special rule for comments. Comments start with //
