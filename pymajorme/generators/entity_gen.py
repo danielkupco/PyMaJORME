@@ -68,7 +68,6 @@ def filter_destination_attribute(name, relation_type):
                       '--' : single(name)}
 
     return relation_types[relation_type]
-    
 
 def single(name):
     decapitalize = lambda s: s[0].lower() + s[1:]

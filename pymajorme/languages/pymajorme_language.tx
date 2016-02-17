@@ -33,7 +33,7 @@ Collection:
 ;
 
 Relation:
-    source=[Entity] relation_type=RelationType destination=[Entity] (':' column_parameters*=FKColumnParameter[','])? 
+    source=[Entity] ('['source_name=ID']')? relation_type=RelationType destination=[Entity] ('['destination_name=ID']')? (':' column_parameters*=FKColumnParameter[','])? 
 ;
 
 RelationType:
