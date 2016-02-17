@@ -44,7 +44,7 @@ def filter_source_types(relation_type):
                       '<->': 'ManyToMany',
                       '--' : 'OneToOne'}
 
-    add_import('javax.persistence' + relation_types[relation_type])
+    add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
 def filter_destination_types(relation_type):
@@ -52,7 +52,7 @@ def filter_destination_types(relation_type):
                       '<->': 'ManyToMany',
                       '--' : 'OneToOne'}
 
-    add_import('javax.persistence' + relation_types[relation_type])
+    add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
 def filter_source_attribute(name, relation_type):

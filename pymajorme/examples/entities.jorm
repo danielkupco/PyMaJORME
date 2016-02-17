@@ -15,5 +15,5 @@ entity ElementType {
 }
 
 ElementType -- Element
-ElementType -> Element
+ElementType -> Element : cascade = ALL, fetch = LAZY
 ElementType <-> Element

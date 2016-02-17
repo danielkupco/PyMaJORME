@@ -45,7 +45,7 @@ DBColumnParameter:
 ;
 
 FKColumnParameter:
-    Cascade | Fetch | target_entity=[Entity]
+    Cascade | Fetch
 ;
 
 ColGUID:
@@ -69,10 +69,18 @@ TrueFalse:
 ;
 
 Cascade:
+    name='cascade' '=' value=CascadeValues
+;
+
+CascadeValues:
     'ALL' | 'DETACH' | 'MERGE' | 'PERSIST' | 'REFRESH' | 'REMOVE'
 ;
 
 Fetch:
+    name='fetch' '=' value=FetchValues
+;
+
+FetchValues:
     'LAZY' | 'EAGER'
 ;
 
