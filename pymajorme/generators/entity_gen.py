@@ -8,6 +8,14 @@ TEMPLATE_NAME = 'entity.template'
 imports = []
 
 
+def initialize_imports():
+    imports.clear()
+    imports.append('java.io.Serializable')
+    imports.append('javax.persistence.Entity')
+    imports.append('javax.persistence.Table')
+    imports.append('javax.persistence.Column')
+
+
 def add_import(value):
     if not imports.__contains__(value):
         imports.append(value)
@@ -40,25 +48,25 @@ def filter_collection_concrete(collection):
     return collection_map.get(collection, collection)
 
 def filter_source_types(relation_type):
-    relation_types = {'->' : 'OneToMany',
+    relation_types = {'->': 'OneToMany',
                       '<->': 'ManyToMany',
-                      '--' : 'OneToOne'}
+                      '--': 'OneToOne'}
 
     add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
 def filter_destination_types(relation_type):
-    relation_types = {'->' : 'ManyToOne',
+    relation_types = {'->': 'ManyToOne',
                       '<->': 'ManyToMany',
-                      '--' : 'OneToOne'}
+                      '--': 'OneToOne'}
 
     add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
 def filter_source_attribute(name, relation_type):
-    relation_types = {'->' : collection(name),
+    relation_types = {'->': collection(name),
                       '<->': collection(name),
-                      '--' : single(name)}
+                      '--': single(name)}
 
     return relation_types[relation_type]
 
@@ -78,11 +86,6 @@ def collection(name):
     return 'List<' + name + '> ' + decapitalize(name) + 's'  
 
 def generate(model, package_path):
-
-    imports.append('java.io.Serializable')
-    imports.append('javax.persistence.Entity')
-    imports.append('javax.persistence.Table')
-    imports.append('javax.persistence.Column')
 
     entities = model.entities
 
@@ -114,6 +117,7 @@ def generate(model, package_path):
 
     for entity in entities:
 
+        initialize_imports()
         relations = model.relations
 
         source_filter = lambda entity_name, r: entity_name == r.source.name
