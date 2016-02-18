@@ -75,11 +75,11 @@ TrueFalse:
 ;
 
 Cascade:
-    name='cascade' '=' value=CascadeValues
+    name='cascade' '=' '{' values+=CascadeValues[','] '}'
 ;
 
 CascadeValues:
-    'ALL' | 'DETACH' | 'MERGE' | 'PERSIST' | 'REFRESH' | 'REMOVE'
+    'ALL' | ('DETACH' | 'MERGE' | 'PERSIST' | 'REFRESH' | 'REMOVE')
 ;
 
 Fetch:
