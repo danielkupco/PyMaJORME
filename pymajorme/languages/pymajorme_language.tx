@@ -35,11 +35,12 @@ Collection:
 // Relations
 
 Relation:
-    source=[Entity] ('<' collection=Collection '>')? ('as' source_name=ID)?
-    ('[' (source_column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
-    relation_type=RelationType
-    destination=[Entity] ('<' collection=Collection '>')? ('as' destination_name=ID)?
-    ('[' (destination_column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
+    source=RelationSide relation_type=RelationType destination=RelationSide
+;
+
+RelationSide:
+    type=[Entity] ('<' collection=Collection '>')? ('as' name=ID)?
+    ('[' (column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
 ;
 
 RelationType:

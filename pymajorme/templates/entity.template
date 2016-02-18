@@ -57,11 +57,11 @@ public class {{entity.name}} implements Serializable {
     {%- for parameter in r.column_parameters|selectattr("value", "defined") -%}
     {{ parameter.name }} = {{ parameter.value }}{{ ', ' }}
     {%- endfor -%}
-    targetEntity = {{r.destination.name}}.class
+    targetEntity = {{r.destination.type.name}}.class
     {%- if not r.relation_type == '->' -%}
-    {{ ', mappedBy = ' ~ r.source_name|default(r.source.name|lower, true) }}
+    {{ ', mappedBy = ' ~ r.source.name|default(r.source.name|lower, true) }}
     {%- endif -%})
-    private {{ r.destination.name|source_attribute(r.relation_type) }};
+    private {{ r.destination|source_attribute(r.relation_type) }};
 
     {% endfor %}
 
@@ -78,8 +78,8 @@ public class {{entity.name}} implements Serializable {
     {%- for parameter in r.column_parameters|selectattr("value", "defined") -%}
     {{ parameter.name }} = {{ parameter.value }}{{ ', ' }}
     {%- endfor -%}
-    targetEntity = {{r.source.name}}.class, {{ 'mappedBy = ' ~ r.destination_name|default(r.destination.name|lower, true) }})
-    private {{ r.source.name|destination_attribute(r.relation_type) }};
+    targetEntity = {{r.source.type.name}}.class, {{ 'mappedBy = ' ~ r.destination.name|default(r.destination.name|lower, true) }})
+    private {{ r.source|destination_attribute(r.relation_type) }};
 
     {% endfor %}
 

@@ -63,27 +63,33 @@ def filter_destination_types(relation_type):
     add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
-def filter_source_attribute(name, relation_type):
+
+
+def filter_source_attribute(relation_side, relation_type):
+    name = relation_side.type.name if relation_side.name == '' else relation_side.name
     relation_types = {'->': collection(name),
                       '<->': collection(name),
                       '--': single(name)}
-
     return relation_types[relation_type]
 
-def filter_destination_attribute(name, relation_type):
+
+def filter_destination_attribute(relation_side, relation_type):
+    name = relation_side.type.name if relation_side.name == '' else relation_side.name
     relation_types = {'->': single(name),
                       '<->': collection(name),
                       '--': single(name)}
-
     return relation_types[relation_type]
+
 
 def single(name):
     decapitalize = lambda s: s[0].lower() + s[1:]
     return name + ' ' + decapitalize(name)
 
+
 def collection(name):
     decapitalize = lambda s: s[0].lower() + s[1:]
     return 'List<' + name + '> ' + decapitalize(name) + 's'  
+
 
 def generate(model, package_path):
 
@@ -100,8 +106,8 @@ def generate(model, package_path):
     jinja_env.filters['collectionConcrete'] = filter_collection_concrete
     jinja_env.filters['source_types'] = filter_source_types
     jinja_env.filters['destination_types'] = filter_destination_types
-    jinja_env.filters['source'] = lambda relations, entity: [r for r in relations if entity.name == r.source.name]
-    jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.name]
+    jinja_env.filters['source'] = lambda relations, entity: [r for r in relations if entity.name == r.source.type.name]
+    jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.type.name]
     jinja_env.filters['source_attribute'] = filter_source_attribute
     jinja_env.filters['destination_attribute'] = filter_destination_attribute
 
@@ -119,9 +125,6 @@ def generate(model, package_path):
 
         initialize_imports()
         relations = model.relations
-
-        source_filter = lambda entity_name, r: entity_name == r.source.name
-        destination_filter = lambda entity_name, r: entity_name == r.destination.name
 
         for attr in entity.attributes:
             if hasattr(attr, 'column_parameters'):
