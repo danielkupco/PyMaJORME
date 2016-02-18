@@ -21,6 +21,29 @@ def add_import(value):
         imports.append(value)
 
 
+def relation_based_imports(relations, entity):
+
+    def add_relation_imports(relation_side):
+        if hasattr(relation_side, 'collection') and relation_side.collection is not None:
+            add_import('java.util.{}'.format(filter_collection_generic(relation_side.collection)))
+            add_import('java.util.{}'.format(filter_collection_concrete(relation_side.collection)))
+        if hasattr(relation_side, 'fk_column_parameters'):
+            for param in relation_side.fk_column_parameters:
+                # cascade
+                if param.name == 'cascade':
+                    for cascade in param.values:
+                        add_import('static javax.persistence.CascadeType.{}'.format(cascade))
+                # fetch
+                if param.name == 'fetch':
+                    add_import('static javax.persistence.FetchType.{}'.format(param.value))
+
+    for r in relations:
+        if r.source.type.name == entity.name:
+            add_relation_imports(r.destination)
+        if r.destination.type.name == entity.name:
+            add_relation_imports(r.source)
+
+
 def filter_javatype(s):
         '''
         Maps type names from model to Java.
@@ -33,19 +56,20 @@ def filter_javatype(s):
                 'string': 'String'
         }.get(s, s)
 
+
 def filter_collection_generic(collection):
     collection_map = {'list': 'List',
                       'set': 'Set',
                       'map': 'Map'}
-    add_import('java.util.' + collection_map.get(collection, collection))
     return collection_map.get(collection, collection)
+
 
 def filter_collection_concrete(collection):
     collection_map = {'list': 'ArrayList',
                       'set': 'HashSet',
                       'map': 'HashMap'}
-    add_import('java.util.' + collection_map.get(collection, collection))
     return collection_map.get(collection, collection)
+
 
 def filter_source_types(relation_type):
     relation_types = {'->': 'OneToMany',
@@ -55,6 +79,7 @@ def filter_source_types(relation_type):
     add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
+
 def filter_destination_types(relation_type):
     relation_types = {'->': 'ManyToOne',
                       '<->': 'ManyToMany',
@@ -62,7 +87,6 @@ def filter_destination_types(relation_type):
 
     add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
-
 
 
 def filter_source_attribute(relation_side, relation_type):
@@ -123,8 +147,11 @@ def generate(model, package_path):
 
     for entity in entities:
 
-        initialize_imports()
         relations = model.relations
+
+        # clear, initialize and resolve relation based imports
+        initialize_imports()
+        relation_based_imports(relations, entity)
 
         for attr in entity.attributes:
             if hasattr(attr, 'column_parameters'):

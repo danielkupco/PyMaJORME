@@ -40,7 +40,7 @@ Relation:
 
 RelationSide:
     type=[Entity] ('<' collection=Collection '>')? ('as' name=ID)?
-    ('[' (column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
+    ('[' (fk_column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
 ;
 
 RelationType:
