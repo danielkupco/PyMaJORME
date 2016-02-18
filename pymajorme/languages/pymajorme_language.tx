@@ -1,5 +1,5 @@
 /*
-  This is a textX specification of pymajorme_language.tx DSL for generating ORM layer for Java applications.
+  This is a textX specification of pymajorme DSL for generating ORM layer for Java applications.
   Authors: Rade Radišić <radisic DOT rade AT gmail DOT com>
            Daniel Kupčo <kupcodandroid AT gmail DOT com>
 */
@@ -25,7 +25,7 @@ JavaType:
 ;
 
 Attribute:
-    type=[JavaType] name=ID ('as' collection=Collection)? (':' column_parameters*=DBColumnParameter[','])?
+    type=[JavaType] name=ID ('<' collection=Collection '>')? ('[' column_parameters*=DBColumnParameter[','] ']')?
 ;
 
 Collection:
@@ -35,7 +35,9 @@ Collection:
 // Relations
 
 Relation:
-    source=[Entity] ('['source_name=ID']')? relation_type=RelationType destination=[Entity] ('['destination_name=ID']')? (':' column_parameters*=FKColumnParameter[','])? 
+    source=[Entity] ('<' collection=Collection '>')? ('as' source_name=ID)? ('[' source_column_parameters*=FKColumnParameter[','] ']')?
+    relation_type=RelationType
+    destination=[Entity] ('<' collection=Collection '>')? ('as' destination_name=ID)? ('[' destination_column_parameters*=FKColumnParameter[','] ']')?
 ;
 
 RelationType:
