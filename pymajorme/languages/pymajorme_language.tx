@@ -35,9 +35,11 @@ Collection:
 // Relations
 
 Relation:
-    source=[Entity] ('<' collection=Collection '>')? ('as' source_name=ID)? ('[' source_column_parameters*=FKColumnParameter[','] ']')?
+    source=[Entity] ('<' collection=Collection '>')? ('as' source_name=ID)?
+    ('[' (source_column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
     relation_type=RelationType
-    destination=[Entity] ('<' collection=Collection '>')? ('as' destination_name=ID)? ('[' destination_column_parameters*=FKColumnParameter[','] ']')?
+    destination=[Entity] ('<' collection=Collection '>')? ('as' destination_name=ID)?
+    ('[' (destination_column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
 ;
 
 RelationType:
@@ -52,6 +54,10 @@ DBColumnParameter:
 
 FKColumnParameter:
     Cascade | Fetch
+;
+
+JoinColumnParameter:
+    ReferencedColumn | DBColumnParameter
 ;
 
 ColGUID:
@@ -88,6 +94,10 @@ Fetch:
 
 FetchValues:
     'LAZY' | 'EAGER'
+;
+
+ReferencedColumn:
+    name='referencedColumnName' '=' value=ID
 ;
 
 // Special rule for comments. Comments start with //

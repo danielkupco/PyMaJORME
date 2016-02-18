@@ -14,5 +14,6 @@ entity ElementType {
     String description
 }
 
-ElementType as tuturututu [ cascade = { ALL }, fetch = EAGER ] -> Element<list> as mumumumu [ cascade = { PERSIST, REMOVE}, fetch = LAZY ]
-ElementType<set> as elementTypes [ cascade = { REMOVE, REFRESH, DETACH }, fetch = EAGER ] <-> Element<set> as elements [cascade = { PERSIST }, fetch = EAGER]
+Element -- ElementType
+ElementType as tuturututu [ cascade = { ALL }, fetch = EAGER : ] -> Element<list> as mumumumu [ cascade = { PERSIST, REMOVE}, fetch = LAZY : name = typeID, referencedColumnName = id, unique = false]
+ElementType<set> as elementTypes [ cascade = { REMOVE, REFRESH, DETACH }, fetch = EAGER : name = types, nullable = true ] <-> Element<set> as elements [cascade = { PERSIST }, fetch = EAGER : name = element0s, nullable = false ]
