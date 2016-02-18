@@ -42,7 +42,30 @@ public class {{entity.name}} implements Serializable {
 
     {% endfor -%}
 
-    {% for r in relations|destination(entity) %}
+    {#- Attributes based on relations -#}
+
+    {% for r in relations|source(entity) %}
+    @{{ r.relation_type|source_types }}
+    {#- JoinColumn annotation #}
+    {%- if "ManyTo" in r.relation_type|destination_types %}
+
+    @JoinColumn(
+    {%- else -%}
+    (
+    {%- endif %}
+    {#- ################### -#}
+    {%- for parameter in r.column_parameters|selectattr("value", "defined") -%}
+    {{ parameter.name }} = {{ parameter.value }}{{ ', ' }}
+    {%- endfor -%}
+    targetEntity = {{r.destination.name}}.class
+    {%- if not r.relation_type == '->' -%}
+    {{ ', mappedBy = ' ~ r.source_name|default(r.source.name|lower, true) }}
+    {%- endif -%})
+    private {{ r.destination.name|source_attribute(r.relation_type) }};
+
+    {% endfor %}
+
+    {%- for r in relations|destination(entity) %}
     @{{ r.relation_type|destination_types }}
     {#- JoinColumn annotation #}
     {%- if "ManyTo" in r.relation_type|destination_types %}
@@ -57,26 +80,6 @@ public class {{entity.name}} implements Serializable {
     {%- endfor -%}
     targetEntity = {{r.source.name}}.class, {{ 'mappedBy = ' ~ r.destination_name|default(r.destination.name|lower, true) }})
     private {{ r.source.name|destination_attribute(r.relation_type) }};
-
-    {% endfor %}
-    {% for r in relations|source(entity) %}
-    @{{ r.relation_type|source_types }}
-    {#- JoinColumn annotation #}
-    {%- if "ManyTo" in r.relation_type|destination_types %}
-
-    @JoinColumn(
-    {%- else -%}
-    (
-    {%- endif %}
-    {#- ################### -#}
-    {%- for parameter in r.column_parameters|selectattr("value", "defined") -%}
-    {{ parameter.name }} = {{ parameter.value }}{{ ', ' }}
-    {%- endfor -%}
-    targetEntity = {{r.destination.name}}.class 
-    {%- if not r.relation_type == '->' -%}
-    {{ ', mappedBy = ' ~ r.source_name|default(r.source.name|lower, true) }}
-    {%- endif -%})
-    private {{ r.destination.name|source_attribute(r.relation_type) }}; 
 
     {% endfor %}
 

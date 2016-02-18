@@ -71,9 +71,9 @@ def filter_source_attribute(name, relation_type):
     return relation_types[relation_type]
 
 def filter_destination_attribute(name, relation_type):
-    relation_types = {'->' : single(name),
+    relation_types = {'->': single(name),
                       '<->': collection(name),
-                      '--' : single(name)}
+                      '--': single(name)}
 
     return relation_types[relation_type]
 
