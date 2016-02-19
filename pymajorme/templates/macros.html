@@ -10,11 +10,11 @@
 {% macro getAttributeNameForJoin(attribute) %}
     {% if attribute.join_column_parameters|selectattr("name", "equalto", "name")|list|count > 0 -%}
     {#- uzima se poslednji name atribut, ako nije definisan uzima se naziv atributa za naziv kolone -#}
-    name = "{{(attribute.join_column_parameters|selectattr("name", "equalto", "name")|list|last).value}}"
+    {{(attribute.join_column_parameters|selectattr("name", "equalto", "name")|list|last).value}}
     {%- elif attribute.name -%}
-    name = "{{attribute.name}}"
-    {% else %}
-    name = "{{attribute.type.name}}"
+    {{attribute.name}}
+    {%- else -%}
+    {{attribute.type.name}}
     {%- endif -%}
 {% endmacro -%}
 
@@ -34,14 +34,14 @@
     {# novi red ako ne postoje atributi #}
 
     {% endif %}
-    @JoinColumn(
+    @JoinColumn(name = "{{getAttributeNameForJoin(oppositeSide)}}"
     {%- if oppositeSide.join_column_parameters %}
-    {%- for param in oppositeSide.join_column_parameters %}
-    {%- if not loop.first %}, {% endif %}{{param.name}} = {{param.value}}
+    {%- for param in oppositeSide.join_column_parameters|rejectattr("name", "equalto", "name") -%}
+    , {{param.name}} = {{param.value}}
     {%- endfor %}
     {% endif -%}
     , targetEntity = {{oppositeSide.type.name}}.class
     {%- if not relation_type == '->' -%}
-    {{ ', mappedBy = ' ~ attributeName|default(attributeName|lower, true) }}
+    , mappedBy = "{{ getAttributeNameForJoin(oppositeSide) }}"
     {%- endif -%})
 {%- endmacro %}
