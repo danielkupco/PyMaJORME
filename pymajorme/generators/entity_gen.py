@@ -8,40 +8,9 @@ TEMPLATE_NAME = 'entity.template'
 imports = []
 
 
-def initialize_imports():
-    imports.clear()
-    imports.append('java.io.Serializable')
-    imports.append('javax.persistence.Entity')
-    imports.append('javax.persistence.Table')
-    imports.append('javax.persistence.Column')
-
-
 def add_import(value):
     if not imports.__contains__(value):
         imports.append(value)
-
-
-def relation_based_imports(relations, entity):
-
-    def add_relation_imports(relation_side):
-        if hasattr(relation_side, 'collection') and relation_side.collection is not None:
-            add_import('java.util.{}'.format(filter_collection_generic(relation_side.collection)))
-            add_import('java.util.{}'.format(filter_collection_concrete(relation_side.collection)))
-        if hasattr(relation_side, 'fk_column_parameters'):
-            for param in relation_side.fk_column_parameters:
-                # cascade
-                if param.name == 'cascade':
-                    for cascade in param.values:
-                        add_import('static javax.persistence.CascadeType.{}'.format(cascade))
-                # fetch
-                if param.name == 'fetch':
-                    add_import('static javax.persistence.FetchType.{}'.format(param.value))
-
-    for r in relations:
-        if r.source.type.name == entity.name:
-            add_relation_imports(r.destination)
-        if r.destination.type.name == entity.name:
-            add_relation_imports(r.source)
 
 
 def filter_javatype(s):
@@ -56,66 +25,64 @@ def filter_javatype(s):
                 'string': 'String'
         }.get(s, s)
 
-
 def filter_collection_generic(collection):
     collection_map = {'list': 'List',
                       'set': 'Set',
                       'map': 'Map'}
+    add_import('java.util.' + collection_map.get(collection, collection))
     return collection_map.get(collection, collection)
-
 
 def filter_collection_concrete(collection):
     collection_map = {'list': 'ArrayList',
                       'set': 'HashSet',
                       'map': 'HashMap'}
+    add_import('java.util.' + collection_map.get(collection, collection))
     return collection_map.get(collection, collection)
 
-
 def filter_source_types(relation_type):
-    relation_types = {'->': 'OneToMany',
+    relation_types = {'->' : 'OneToMany',
                       '<->': 'ManyToMany',
-                      '--': 'OneToOne'}
+                      '--' : 'OneToOne'}
 
     add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
-
 
 def filter_destination_types(relation_type):
-    relation_types = {'->': 'ManyToOne',
+    relation_types = {'->' : 'ManyToOne',
                       '<->': 'ManyToMany',
-                      '--': 'OneToOne'}
+                      '--' : 'OneToOne'}
 
     add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
-
-def filter_source_attribute(relation_side, relation_type):
-    name = relation_side.type.name if relation_side.name == '' else relation_side.name
-    relation_types = {'->': collection(name),
+def filter_source_attribute(name, relation_type):
+    relation_types = {'->' : collection(name),
                       '<->': collection(name),
-                      '--': single(name)}
+                      '--' : single(name)}
+
     return relation_types[relation_type]
 
-
-def filter_destination_attribute(relation_side, relation_type):
-    name = relation_side.type.name if relation_side.name == '' else relation_side.name
-    relation_types = {'->': single(name),
+def filter_destination_attribute(name, relation_type):
+    relation_types = {'->' : single(name),
                       '<->': collection(name),
-                      '--': single(name)}
-    return relation_types[relation_type]
+                      '--' : single(name)}
 
+    return relation_types[relation_type]
 
 def single(name):
     decapitalize = lambda s: s[0].lower() + s[1:]
     return name + ' ' + decapitalize(name)
 
-
 def collection(name):
     decapitalize = lambda s: s[0].lower() + s[1:]
     return 'List<' + name + '> ' + decapitalize(name) + 's'  
 
-
 def generate(model, package_path):
+
+    imports.append('java.io.Serializable')
+    imports.append('javax.persistence.Entity')
+    imports.append('javax.persistence.Table')
+    imports.append('javax.persistence.Column')
 
     entities = model.entities
 
@@ -130,8 +97,8 @@ def generate(model, package_path):
     jinja_env.filters['collectionConcrete'] = filter_collection_concrete
     jinja_env.filters['source_types'] = filter_source_types
     jinja_env.filters['destination_types'] = filter_destination_types
-    jinja_env.filters['source'] = lambda relations, entity: [r for r in relations if entity.name == r.source.type.name]
-    jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.type.name]
+    jinja_env.filters['source'] = lambda relations, entity: [r for r in relations if entity.name == r.source.name]
+    jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.name]
     jinja_env.filters['source_attribute'] = filter_source_attribute
     jinja_env.filters['destination_attribute'] = filter_destination_attribute
 
@@ -149,9 +116,8 @@ def generate(model, package_path):
 
         relations = model.relations
 
-        # clear, initialize and resolve relation based imports
-        initialize_imports()
-        relation_based_imports(relations, entity)
+        source_filter = lambda entity_name, r: entity_name == r.source.name
+        destination_filter = lambda entity_name, r: entity_name == r.destination.name
 
         for attr in entity.attributes:
             if hasattr(attr, 'column_parameters'):

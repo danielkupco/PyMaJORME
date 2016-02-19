@@ -13,8 +13,9 @@ import generators.persistence_xml_gen as persistence_xml
 @click.option('-e', '--entity', is_flag=True, help='Generate entity classes')
 @click.option('-d', '--dao', is_flag=True, help='Generate Dao layer')
 @click.option('-p', '--persistence', is_flag=True, help='Generate persistence.xml file')
+@click.option('-a', '--all', 'all_above', is_flag=True, help='Generate all previous')     # apparently, "all" is reserved keyword in Python
 @click.argument('filename', nargs=1, type=click.Path(exists=True))
-def pymajorme(entity, dao, persistence, filename):
+def pymajorme(entity, dao, persistence, all_above, filename):
     current_dir = os.getcwd()
     gen_dir = os.path.join(current_dir, pymajorme_config.GEN_DIR)
 
@@ -41,7 +42,11 @@ def pymajorme(entity, dao, persistence, filename):
         dao_gen.generate(model, current_path)
     elif persistence:
         persistence_xml.generate(model)
-
+    elif all_above:
+        entity_gen.generate(model, current_path)
+        dao_gen.generate(model, current_path)
+        persistence_xml.generate(model)
+        
 
 def load_model(file_name):
     """Generates program model from '/examples' and returns it."""
