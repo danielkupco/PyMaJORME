@@ -1,4 +1,5 @@
 import os
+import click
 import pymajorme_config
 from textx.metamodel import metamodel_from_file
 from textx.export import metamodel_export, model_export
@@ -7,6 +8,45 @@ import generators.entity_gen as entity_gen
 import generators.dao_gen as dao_gen
 import generators.persistence_xml_gen as persistence_xml
 
+
+@click.command()
+@click.option('-e', '--entity', is_flag=True, help='Generate entity classes')
+@click.option('-d', '--dao', is_flag=True, help='Generate Dao layer')
+@click.option('-p', '--persistence', is_flag=True, help='Generate persistence.xml file')
+@click.option('-a', '--all', 'all_above', is_flag=True, help='Generate all previous')     # apparently, "all" is reserved keyword in Python
+@click.argument('filename', nargs=1, type=click.Path(exists=True))
+def pymajorme(entity, dao, persistence, all_above, filename):
+    current_dir = os.getcwd()
+    gen_dir = os.path.join(current_dir, pymajorme_config.GEN_DIR)
+
+
+    # Create output folder
+    if not os.path.exists(pymajorme_config.GEN_DIR):
+        os.mkdir(pymajorme_config.GEN_DIR)
+
+    model = load_model(click.format_filename(filename))
+
+    # Create package structure
+    current_path = gen_dir
+    packages = model.package.name.split('.')
+    for package in packages:
+        current_path = os.path.join(current_path, package)
+
+    # kreiraju se folderi samo ako ne postoje
+    os.makedirs(current_path, exist_ok=True)
+
+    # passing model to specific generators
+    if entity:
+        entity_gen.generate(model, current_path)
+    elif dao:
+        dao_gen.generate(model, current_path)
+    elif persistence:
+        persistence_xml.generate(model)
+    elif all_above:
+        entity_gen.generate(model, current_path)
+        dao_gen.generate(model, current_path)
+        persistence_xml.generate(model)
+        
 
 def load_model(file_name):
     """Generates program model from '/examples' and returns it."""
@@ -28,32 +68,32 @@ def load_model(file_name):
 
     metamodel_export(jorm_mm, os.path.join(visualization_dir, 'jorm_metamodel.dot'))
 
-    model = jorm_mm.model_from_file(os.path.join(current_dir, 'examples',
-                                               file_name))
+    model = jorm_mm.model_from_file(os.path.join(current_dir, file_name))
+ 
     model_export(model, os.path.join(visualization_dir, 'jorm_model.dot'))
 
     return model
 
-current_dir = os.getcwd()
-gen_dir = os.path.join(current_dir, pymajorme_config.GEN_DIR)
+def prepare():
+    current_dir = os.getcwd()
+    gen_dir = os.path.join(current_dir, pymajorme_config.GEN_DIR)
 
 
-# Create output folder
-if not os.path.exists(pymajorme_config.GEN_DIR):
-    os.mkdir(pymajorme_config.GEN_DIR)
+    # Create output folder
+    if not os.path.exists(pymajorme_config.GEN_DIR):
+        os.mkdir(pymajorme_config.GEN_DIR)
 
-model = load_model('entities.jorm')
+    model = load_model('entities.jorm')
 
-# Create package structure
-current_path = gen_dir
-packages = model.package.name.split('.')
-for package in packages:
-    current_path = os.path.join(current_path, package)
+    # Create package structure
+    current_path = gen_dir
+    packages = model.package.name.split('.')
+    for package in packages:
+        current_path = os.path.join(current_path, package)
 
-# kreiraju se folderi samo ako ne postoje
-os.makedirs(current_path, exist_ok=True)
+    # kreiraju se folderi samo ako ne postoje
+    os.makedirs(current_path, exist_ok=True)
 
-# passing model to specific generators
-entity_gen.generate(model, current_path)
-dao_gen.generate(model, current_path)
-persistence_xml.generate(model)
+
+if __name__ == '__main__':
+    pymajorme()
