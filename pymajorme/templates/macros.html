@@ -1,0 +1,47 @@
+{% macro getAttributeName(attribute) %}
+    {% if attribute.column_parameters|selectattr("name", "equalto", "name")|list|count > 0 -%}
+    {#- uzima se poslednji name atribut, ako nije definisan uzima se naziv atributa za naziv kolone -#}
+    name = "{{(attribute.column_parameters|selectattr("name", "equalto", "name")|list|last).value}}"
+    {%- else -%}
+    name = "{{attribute.name}}"
+    {%- endif -%}
+{% endmacro -%}
+
+{% macro getAttributeNameForJoin(attribute) %}
+    {% if attribute.join_column_parameters|selectattr("name", "equalto", "name")|list|count > 0 -%}
+    {#- uzima se poslednji name atribut, ako nije definisan uzima se naziv atributa za naziv kolone -#}
+    name = "{{(attribute.join_column_parameters|selectattr("name", "equalto", "name")|list|last).value}}"
+    {%- elif attribute.name -%}
+    name = "{{attribute.name}}"
+    {% else %}
+    name = "{{attribute.type.name}}"
+    {%- endif -%}
+{% endmacro -%}
+
+{% macro relationAnnotations(attributeName, oppositeSide, relation_type) %}
+    {% if oppositeSide.fk_column_parameters %}(
+    {%- for param in oppositeSide.fk_column_parameters %}
+    {%- if param.name == "cascade" -%}
+    cascade = {
+    {%- for cascade in param.values -%}
+    {%- if not loop.first %}, {% endif %}{{cascade}}
+    {%- endfor %}}
+    {%- else %}
+    {%- if not loop.first %}, {% endif %}{{param.name}} = {{param.value}}
+    {%- endif %}
+    {% endfor %})
+    {% else %}
+    {# novi red ako ne postoje atributi #}
+
+    {% endif %}
+    @JoinColumn(
+    {%- if oppositeSide.join_column_parameters %}
+    {%- for param in oppositeSide.join_column_parameters %}
+    {%- if not loop.first %}, {% endif %}{{param.name}} = {{param.value}}
+    {%- endfor %}
+    {% endif -%}
+    , targetEntity = {{oppositeSide.type.name}}.class
+    {%- if not relation_type == '->' -%}
+    {{ ', mappedBy = ' ~ attributeName|default(attributeName|lower, true) }}
+    {%- endif -%})
+{%- endmacro %}
