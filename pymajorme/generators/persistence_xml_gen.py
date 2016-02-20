@@ -6,7 +6,7 @@ import datetime
 TEMPLATE_NAME = 'persistence_xml.template'
 
 
-def generate(model):
+def generate(model, output_path):
 
     # Initialize template engine.
     jinja_env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True,
@@ -20,7 +20,7 @@ def generate(model):
 
     rendered = template.render({'date': date})
 
-    meta_inf_dir = os.path.join(pymajorme_config.GEN_DIR, 'META-INF')
+    meta_inf_dir = os.path.join(output_path, 'META-INF')
     if not os.path.exists(meta_inf_dir):
         os.mkdir(meta_inf_dir)
 
