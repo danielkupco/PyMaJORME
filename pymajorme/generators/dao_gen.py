@@ -2,6 +2,7 @@ import os
 import pymajorme_config
 import jinja2
 import datetime
+from helpers.pack import pack
 
 CLASS_TEMPLATE_NAME = 'dao_class.template'
 INTERFACE_TEMPLATE_NAME = 'dao_interface.template'
@@ -14,7 +15,7 @@ def add_import(value):
     if not imports.__contains__(value):
         imports.append(value)
 
-
+@pack
 def generate(model, package_path):
 
     entities = model.entities
