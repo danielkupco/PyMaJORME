@@ -14,39 +14,27 @@ import generators.persistence_xml_gen as persistence_xml
 @click.option('-d', '--dao', is_flag=True, help='Generate Dao layer')
 @click.option('-p', '--persistence', is_flag=True, help='Generate persistence.xml file')
 @click.option('-a', '--all', 'all_above', is_flag=True, help='Generate all previous')     # apparently, "all" is reserved keyword in Python
-@click.argument('filename', nargs=1, type=click.Path(exists=True))
-def pymajorme(entity, dao, persistence, all_above, filename):
-    current_dir = os.getcwd()
-    gen_dir = os.path.join(current_dir, pymajorme_config.GEN_DIR)
+@click.option('-r', '--root', is_flag=True, help='Make a root directory for generated code')
+@click.argument('source', nargs=1, type=click.Path(exists=True))
+@click.argument('output_path', nargs=1, type=click.Path(exists=True))
+def cli(entity, dao, persistence, all_above, root, source, output_path):
 
+    model = load_model(click.format_filename(source))
 
-    # Create output folder
-    if not os.path.exists(pymajorme_config.GEN_DIR):
-        os.mkdir(pymajorme_config.GEN_DIR)
-
-    model = load_model(click.format_filename(filename))
-
-    # Create package structure
-    current_path = gen_dir
-    packages = model.package.name.split('.')
-    for package in packages:
-        current_path = os.path.join(current_path, package)
-
-    # kreiraju se folderi samo ako ne postoje
-    os.makedirs(current_path, exist_ok=True)
+    if root:
+        output_path = os.path.join(output_path, 'pyma_gen')
 
     # passing model to specific generators
     if entity:
-        entity_gen.generate(model, current_path)
+        entity_gen.generate(model, output_path)
     elif dao:
-        dao_gen.generate(model, current_path)
+        dao_gen.generate(model, output_path)
     elif persistence:
-        persistence_xml.generate(model)
+        persistence_xml.generate(model, output_path)
     elif all_above:
-        entity_gen.generate(model, current_path)
-        dao_gen.generate(model, current_path)
-        persistence_xml.generate(model)
-        
+        entity_gen.generate(model, output_path)
+        dao_gen.generate(model, output_path)
+        persistence_xml.generate(model, output_path)
 
 def load_model(file_name):
     """Generates program model from '/examples' and returns it."""
@@ -74,26 +62,16 @@ def load_model(file_name):
 
     return model
 
-def prepare():
-    current_dir = os.getcwd()
-    gen_dir = os.path.join(current_dir, pymajorme_config.GEN_DIR)
 
+def packaging(output_path, model):
+    '''Returns a path with all directories added to form
+       user defined package structure'''
 
-    # Create output folder
-    if not os.path.exists(pymajorme_config.GEN_DIR):
-        os.mkdir(pymajorme_config.GEN_DIR)
-
-    model = load_model('entities.jorm')
-
-    # Create package structure
-    current_path = gen_dir
     packages = model.package.name.split('.')
     for package in packages:
-        current_path = os.path.join(current_path, package)
+        path = os.path.join(output_path, package)
 
-    # kreiraju se folderi samo ako ne postoje
-    os.makedirs(current_path, exist_ok=True)
-
+    return click.format_filename(path)
 
 if __name__ == '__main__':
-    pymajorme()
+    cli()

@@ -3,6 +3,7 @@ import pymajorme_config
 import jinja2
 import helpers.javatype as javatype
 import datetime
+from helpers.pack import pack
 
 TEMPLATE_NAME = 'entity.template'
 imports = []
@@ -114,7 +115,7 @@ def collection(name):
     decapitalize = lambda s: s[0].lower() + s[1:]
     return 'List<' + name + '> ' + decapitalize(name) + 's'  
 
-
+@pack
 def generate(model, package_path):
 
     entities = model.entities
