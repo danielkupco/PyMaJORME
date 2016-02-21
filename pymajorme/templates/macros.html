@@ -1,0 +1,58 @@
+{% macro getAttributeName(attribute) %}
+    {% if attribute.column_parameters|selectattr("name", "equalto", "name")|list|count > 0 -%}
+    {#- uzima se poslednji name atribut, ako nije definisan uzima se naziv atributa za naziv kolone -#}
+    name = "{{(attribute.column_parameters|selectattr("name", "equalto", "name")|list|last).value}}"
+    {%- else -%}
+    name = "{{attribute.name}}"
+    {%- endif -%}
+{% endmacro -%}
+
+{% macro getAttributeNameForJoin(attribute) %}
+    {% if attribute.join_column_parameters|selectattr("name", "equalto", "name")|list|count > 0 -%}
+    {#- uzima se poslednji name atribut, ako nije definisan uzima se naziv atributa za naziv kolone -#}
+    {{(attribute.join_column_parameters|selectattr("name", "equalto", "name")|list|last).value}}
+    {%- elif attribute.name -%}
+    {{attribute.name}}
+    {%- else -%}
+    {{attribute.type.name}}
+    {%- endif -%}
+{% endmacro -%}
+
+{% macro relationAnnotations(sourceSide, destinationSide, relation_type, reverse) %}
+    {% if destinationSide.fk_column_parameters %}(
+    {%- for param in destinationSide.fk_column_parameters %}
+    {%- if param.name == "cascade" -%}
+    cascade = {
+    {%- for cascade in param.values -%}
+    {%- if not loop.first %}, {% endif %}{{cascade}}
+    {%- endfor %}}
+    {%- else %}
+    {%- if not loop.first %}, {% endif %}{{param.name}} = {{param.value}}
+    {%- endif %}
+    {% endfor %}
+    {%- if relation_type == 'OneToMany' and not reverse -%}
+    , targetEntity = {{destinationSide.type.name}}.class, mappedBy = "{{ getAttributeNameForJoin(sourceSide)|decapitalize }}"
+    {%- endif -%})
+    {% else %}
+    {# novi red ako ne postoje atributi #}
+
+    {% endif %}
+    @JoinColumn(name = "{{getAttributeNameForJoin(destinationSide)}}"
+    {%- if relation_type == 'ManyToOne' -%}
+    , referencedColumnName = "
+    {%- if sourceSide.join_column_atributes|selectattr("name", "equalto", "referencedColumnName")|list|count > 0 -%}
+    {{- (sourceSide.join_column_atributes|selectattr("name", "equalto", "referencedColumnName")|list|first).value }}
+    {%- else -%}
+    id
+    {%- endif %}"
+    {%- endif -%}
+    {%- if destinationSide.join_column_parameters %}
+    {%- for param in destinationSide.join_column_parameters|rejectattr("name", "equalto", "name")|rejectattr("name", "equalto", "referencedColumnName") -%}
+    , {{param.name}} = {{param.value}}
+    {%- endfor %}
+    {% endif -%}
+    , targetEntity = {{destinationSide.type.name}}.class
+    {%- if not relation_type == 'OneToMany' and not reverse -%}
+    , mappedBy = "{{ getAttributeNameForJoin(sourceSide)|decapitalize }}"
+    {%- endif -%})
+{%- endmacro %}
