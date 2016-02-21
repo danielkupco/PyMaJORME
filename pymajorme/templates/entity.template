@@ -39,14 +39,14 @@ public class {{entity.name}} implements Serializable {
 
     {% for r in relations|source(entity) %}
     @{{ r.relation_type|source_types }}
-    {{- macros.relationAnnotations(r.source.name, r.destination, r.relation_type) }}
+    {{- macros.relationAnnotations(r.source, r.destination, r.relation_type|source_types, False) }}
     private {{ r.destination|source_attribute(r.relation_type) }};
 
     {% endfor %}
 
     {%- for r in relations|destination(entity) %}
     @{{ r.relation_type|destination_types }}
-    {{- macros.relationAnnotations(r.destination.name, r.source, r.relation_type)}}
+    {{- macros.relationAnnotations(r.destination, r.source, r.relation_type|source_types, True)}}
     private {{ r.source|destination_attribute(r.relation_type) }};
 
     {% endfor %}
