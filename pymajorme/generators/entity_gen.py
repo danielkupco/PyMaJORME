@@ -39,8 +39,10 @@ def relation_based_imports(relations, entity):
 
     for r in relations:
         if r.source.type.name == entity.name:
+            add_import('javax.persistence.' + filter_source_types(r.relation_type))
             add_relation_imports(r.destination)
         if r.destination.type.name == entity.name:
+            add_import('javax.persistence.' + filter_destination_types(r.relation_type))
             add_relation_imports(r.source)
 
 
@@ -75,8 +77,6 @@ def filter_source_types(relation_type):
     relation_types = {'->': 'OneToMany',
                       '<->': 'ManyToMany',
                       '--': 'OneToOne'}
-
-    add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
 
@@ -84,35 +84,43 @@ def filter_destination_types(relation_type):
     relation_types = {'->': 'ManyToOne',
                       '<->': 'ManyToMany',
                       '--': 'OneToOne'}
-
-    add_import('javax.persistence.' + relation_types[relation_type])
     return relation_types[relation_type]
 
 
 def filter_source_attribute(relation_side, relation_type):
     name = relation_side.type.name if relation_side.name == '' else relation_side.name
-    relation_types = {'->': collection(name),
-                      '<->': collection(name),
-                      '--': single(name)}
+    relation_types = {'->': collection(relation_side),
+                      '<->': collection(relation_side),
+                      '--': single(relation_side)}
     return relation_types[relation_type]
 
 
 def filter_destination_attribute(relation_side, relation_type):
-    name = relation_side.type.name if relation_side.name == '' else relation_side.name
-    relation_types = {'->': single(name),
-                      '<->': collection(name),
-                      '--': single(name)}
+    relation_types = {'->': single(relation_side),
+                      '<->': collection(relation_side),
+                      '--': single(relation_side)}
     return relation_types[relation_type]
 
 
-def single(name):
-    decapitalize = lambda s: s[0].lower() + s[1:]
-    return name + ' ' + decapitalize(name)
+def single(relation_side):
+    name = relation_side.type.name if relation_side.name == '' else relation_side.name
+    return relation_side.type.name + ' ' + decapitalize(name)
 
 
-def collection(name):
-    decapitalize = lambda s: s[0].lower() + s[1:]
-    return 'List<' + name + '> ' + decapitalize(name) + 's'  
+def collection(relation_side):
+    if relation_side.name == '':
+        name = relation_side.type.name + 's'
+    else:
+        name = relation_side.name
+    clctn = 'set'
+    if relation_side.collection is not None:
+        clctn = relation_side.collection
+    return '{0}<{2}> {3} = new {1}<{2}>()'.format(filter_collection_generic(clctn), filter_collection_concrete(clctn),
+            relation_side.type.name, decapitalize(name))
+
+
+def decapitalize(s):
+    return s[0].lower() + s[1:]
 
 
 def generate(model, package_path):
@@ -134,6 +142,7 @@ def generate(model, package_path):
     jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.type.name]
     jinja_env.filters['source_attribute'] = filter_source_attribute
     jinja_env.filters['destination_attribute'] = filter_destination_attribute
+    jinja_env.filters['decapitalize'] = decapitalize
 
     # Load Java template
     template = jinja_env.get_template(TEMPLATE_NAME)
