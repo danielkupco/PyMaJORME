@@ -38,16 +38,16 @@ public class {{entity.name}} implements Serializable {
     {#- Attributes based on relations -#}
 
     {% for r in relations|source(entity) %}
-    @{{ r.relation_type|source_types }}
-    {{- macros.relationAnnotations(r.source, r.destination, r.relation_type|source_types, False) }}
-    private {{ r.destination|source_attribute(r.relation_type) }};
+    @{{ r.relation_type|relation_name(False) }}
+    {{- macros.relationAnnotations(r.source, r.destination, r.relation_type|relation_name(False), False) }}
+    private {{ r.destination|relation_attribute(r.relation_type, True) }};
 
     {% endfor %}
 
     {%- for r in relations|destination(entity) %}
-    @{{ r.relation_type|destination_types }}
-    {{- macros.relationAnnotations(r.destination, r.source, r.relation_type|source_types, True)}}
-    private {{ r.source|destination_attribute(r.relation_type) }};
+    @{{ r.relation_type|relation_name(True) }}
+    {{- macros.relationAnnotations(r.destination, r.source, r.relation_type|relation_name(True), True)}}
+    private {{ r.source|relation_attribute(r.relation_type, False) }};
 
     {% endfor %}
 
