@@ -29,16 +29,19 @@
     {%- else %}
     {%- if not loop.first %}, {% endif %}{{param.name}} = {{param.value}}
     {%- endif %}
-    {% endfor %}
+    {% endfor -%}
 
-    {%- if relation_type|relation_name(reverse) == 'OneToMany' -%}
-    , targetEntity = {{destinationSide.type.name}}.class, mappedBy = "{{ getAttributeNameForJoin(sourceSide)|decapitalize }}"
+    , targetEntity = {{destinationSide.type.name}}.class
+
+    {#- and reverse because one sided mappedBy is enough -#}
+    {%- if not relation_type|relation_name(reverse) == 'ManyToOne' and reverse -%}
+    , mappedBy = "{{ getAttributeNameForJoin(sourceSide)|decapitalize }}"
     {%- endif -%}
 
     {# Optional attribute based on minimal cardinality #}
     {% if relation_type|relation_name(reverse) == 'OneToOne' or relation_type|relation_name(reverse) == 'ManyToOne' %}
 
-    {%- if relation_type.src_min_cardinality and not reverse -%}
+    {%- if relation_type.src_min_cardinality and reverse -%}
     , optional =
     {%- if relation_type.src_min_cardinality == '0' -%}
     {{ ' true' }}
@@ -47,7 +50,7 @@
     {%- endif %}
     {% endif %}
 
-    {%- if relation_type.dst_min_cardinality and reverse -%}
+    {%- if relation_type.dst_min_cardinality and not reverse -%}
     , optional =
     {%- if relation_type.dst_min_cardinality == '0' -%}
     {{ ' true' }}
@@ -60,8 +63,15 @@
 
     {#- Optional attribute based on minimal cardinality if non of attributes are defined #}
     {%- elif relation_type|relation_name(reverse) == 'OneToOne' or relation_type|relation_name(reverse) == 'ManyToOne' -%}
-    {%- if relation_type.src_min_cardinality and not reverse -%}
-    (optional =
+    (targetEntity = {{destinationSide.type.name}}.class
+
+    {#- and reverse because one sided mappedBy is enough -#}
+    {%- if not relation_type|relation_name(reverse) == 'ManyToOne' and reverse -%}
+    , mappedBy = "{{ getAttributeNameForJoin(sourceSide)|decapitalize }}"
+    {%- endif -%}
+
+    {%- if relation_type.src_min_cardinality and reverse -%}
+    , optional =
     {%- if relation_type.src_min_cardinality == '0' -%}
     {{ ' true' }}
     {%- elif relation_type.src_min_cardinality == '1' -%}
@@ -69,8 +79,8 @@
     {%- endif %})
     {%- endif %}
 
-    {%- if relation_type.dst_min_cardinality and reverse -%}
-    (optional =
+    {%- if relation_type.dst_min_cardinality and not reverse -%}
+    , optional =
     {%- if relation_type.dst_min_cardinality == '0' -%}
     {{ ' true' }}
     {%- elif relation_type.dst_min_cardinality == '1' -%}
@@ -92,9 +102,5 @@
     {%- for param in destinationSide.join_column_parameters|rejectattr("name", "equalto", "name")|rejectattr("name", "equalto", "referencedColumnName") -%}
     , {{param.name}} = {{param.value}}
     {%- endfor %}
-    {% endif -%}
-    , targetEntity = {{destinationSide.type.name}}.class
-    {%- if not relation_type == 'OneToMany' and not reverse -%}
-    , mappedBy = "{{ getAttributeNameForJoin(sourceSide)|decapitalize }}"
-    {%- endif -%})
+    {% endif -%})
 {%- endmacro %}
