@@ -64,11 +64,11 @@ public class {{entity.name}} implements Serializable {
 
     {% for attribute in entity.attributes %}
     public {{attribute.type|javatype}} get{{attribute.name|title}}() {
-        return this.{{attribute.name}};
+        return {{attribute.name}};
     }
 
-    public void set{{attribute.name|title}}({{attribute.type|javatype}} attribute.name) {
-        this.{{attribute.name}} = attribute.name;
+    public void set{{attribute.name|title}}({{attribute.type|javatype}} {{attribute.name}}) {
+        this.{{attribute.name}} = {{attribute.name}};
     }
 
     {% endfor %}
@@ -76,13 +76,11 @@ public class {{entity.name}} implements Serializable {
     {#- Consistency preserving getters and setters based on relations -#}
 
     {% for r in relations|source(entity) %}
-    {{r.relation_type|relation_name(False)}}
 {{ macros.forAllRelationTypes(r, False) }}
     {% endfor %}
 
-    {% for r in relations|destination(entity) %}
-    {{r.relation_type|relation_name(True)}}
+    {%- for r in relations|destination(entity) %}
 {{ macros.forAllRelationTypes(r, True) }}
-    {% endfor %}
+    {% endfor -%}
 
 }

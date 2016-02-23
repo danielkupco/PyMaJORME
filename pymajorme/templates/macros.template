@@ -209,36 +209,36 @@ public {{ source.collection|collectionGeneric }}<{{ source.type.name }}> get{{ g
 
 {% macro forAllRelationTypes(relation, reverse) %}
     {%- if relation.relation_type|relation_name(reverse) == 'OneToOne' %}
-    {% if reverse %}
+    {%- if reverse %}
     {{ getOne(relation.source) }}
 {{ setOneToOne(relation.source, relation.destination) }}
-    {% else %}
+    {%- else %}
     {{ getOne(relation.destination) }}
 {{ setOneToOne(relation.destination, relation.source) }}
-    {% endif %}
+    {%- endif %}
     {%- elif relation.relation_type|relation_name(reverse) == 'OneToMany' %}
-    {% if reverse %}
+    {%- if reverse %}
     {{ getMany(relation.source) }}
 {{ setOneToMany(relation.source, relation.destination) }}
-    {% else %}
+    {%- else %}
     {{ getMany(relation.destination) }}
 {{ setOneToMany(relation.destination, relation.source) }}
-    {% endif %}
+    {%- endif %}
     {%- elif relation.relation_type|relation_name(reverse) == 'ManyToOne' %}
-    {% if reverse %}
+    {%- if reverse %}
     {{ getOne(relation.source) }}
 {{ setManyToOne(relation.source, relation.destination) }}
-    {% else %}
+    {%- else %}
     {{ getOne(relation.destination) }}
 {{ setManyToOne(relation.destination, relation.source) }}
-    {% endif %}
+    {%- endif %}
     {%- elif relation.relation_type|relation_name(reverse) == 'ManyToMany' %}
-    {% if reverse %}
+    {%- if reverse %}
     {{ getMany(relation.source) }}
 {{ setManyToMany(relation.source, relation.destination) }}
-    {% else %}
+    {%- else %}
     {{ getMany(relation.destination) }}
 {{ setManyToMany(relation.destination, relation.source) }}
-    {% endif %}
+    {%- endif %}
     {% endif %}
 {% endmacro %}
