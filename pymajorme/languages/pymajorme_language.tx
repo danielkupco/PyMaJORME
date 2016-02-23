@@ -16,7 +16,7 @@ Package:
 
 Entity:
     'entity' name=ID '{'
-        attributes+=Attribute
+        attributes*=Attribute
     '}'
 ;
 
@@ -29,7 +29,7 @@ Attribute:
 ;
 
 Collection:
-    'set' | 'list' | 'map'
+    'set' | 'list'
 ;
 
 // Relations

@@ -62,16 +62,14 @@ def filter_javatype(s):
 
 def filter_collection_generic(collection_value):
     collection_map = {'list': 'List',
-                      'set': 'Set',
-                      'map': 'Map'}
-    return collection_map.get(collection_value, collection_value)
+                      'set': 'Set'}
+    return collection_map.get(collection_value, 'Set')
 
 
 def filter_collection_concrete(collection_value):
     collection_map = {'list': 'ArrayList',
-                      'set': 'HashSet',
-                      'map': 'HashMap'}
-    return collection_map.get(collection_value, collection_value)
+                      'set': 'HashSet'}
+    return collection_map.get(collection_value, 'HashSet')
 
 
 def filter_relation_symbol(relation_type, flip=False):
@@ -127,8 +125,16 @@ def collection(relation_side):
             relation_side.type.name, decapitalize(name))
 
 
+def capitalize(s):
+    return s[0].upper() + s[1:]
+
+
 def decapitalize(s):
     return s[0].lower() + s[1:]
+
+
+def singularize(s):
+    return s[:-1]
 
 
 @pack
@@ -149,7 +155,9 @@ def generate(model, package_path):
     jinja_env.filters['source'] = lambda relations, entity: [r for r in relations if entity.name == r.source.type.name]
     jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.type.name]
     jinja_env.filters['relation_attribute'] = filter_relation_attribute
+    jinja_env.filters['capitalize'] = capitalize
     jinja_env.filters['decapitalize'] = decapitalize
+    jinja_env.filters['singularize'] = singularize
 
     # Load Java template
     template = jinja_env.get_template(TEMPLATE_NAME)
