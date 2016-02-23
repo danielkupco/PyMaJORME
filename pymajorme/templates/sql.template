@@ -1,0 +1,18 @@
+
+{% for entity in entities %}
+DROP TABLE IF EXISTS {{ entity.name|lower }};
+{% endfor %}
+
+{% for entity in entities %}
+CREATE TABLE {{ entity.name|lower }}(
+{{ entity.attributes|map('tuple')|join(',\r')|indent(4, true) }}
+);
+
+{% endfor %}
+
+{% for entity, constraint_name in constraints.items() %}
+ALTER TABLE {{ entity.name|lower }}
+ADD CONSTRAINT {{ constraint_name  }} primary_key({{ entity.attributes|primary_keys|join(', ') }});
+
+{% endfor %}
+

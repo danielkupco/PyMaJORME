@@ -8,3 +8,6 @@
 
 # PyCharm files
 .idea/
+
+# Python egg-info
+**/pymajorme.egg-info
