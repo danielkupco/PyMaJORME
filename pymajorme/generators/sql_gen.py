@@ -4,6 +4,7 @@ import helpers.javatype as javatype
 import datetime
 import pymajorme_config
 import hashlib 
+from helpers.constraints import *
 
 TEMPLATE_NAME = 'sql.template'
 
@@ -16,10 +17,10 @@ def filter_sql_type(attribute_type):
     return sql_types[attribute_type]
 
 def filter_tuple(attribute):
-    return attribute.name + ' ' + filter_sql_type(attribute.type.name)
+    return attribute.name + ' ' + filter_sql_type(attribute.type.name) + '(255)'
 
-def filter_primary_keys(attributes):
-    return [a.name for a in attributes for c in a.column_parameters if c.name == 'GUID']
+def filter_primary_keys(attributes, value):
+    return [a.name for a in attributes for c in a.column_parameters if c.name == value]
 
 def generate(model, output_path):
 
@@ -43,14 +44,20 @@ def generate(model, output_path):
     rendered = template.render({ 'entities' : entities,
                                  'relations': relations,
                                  'date'     : date,
-                                 'constraints': constraint_names(entities, relations)
+                                 'constraints': constraints(entities, relations)
                               })
 
     with(open(os.path.join(output_path, 'initDB.sql'), 'w')) as f:
         f.write(rendered)
 
-def constraint_names(entities, relations):
-    primary_keys = ['PK' + hashlib.md5(bytes(e.name, 'utf-8')).hexdigest().upper() for e in entities]
+def encode(name):
+    return hashlib.md5(bytes(name, 'utf-8')).hexdigest().upper()
 
-    return dict(zip(entities, primary_keys))
+def constraints(entities, relations):
+    primary_keys = [(e,'PK' + encode(e.name))  for e in entities]
+    foreign_keys = [(e, r, 'FK' + encode(r.source.type.name + r.destination.type.name)) for r in relations 
+                    for e in entities if e.name == r.source.type.name or e.name == r.destination.type.name]
+
+    return Constraints(primary_keys, foreign_keys)
+ 
 
