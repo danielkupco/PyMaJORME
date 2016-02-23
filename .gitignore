@@ -8,3 +8,6 @@
 
 # PyCharm files
 .idea/
+
+# folder created after installing pymajorme with setup.py
+**/pymajorme.egg-info/
