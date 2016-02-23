@@ -66,5 +66,17 @@ def load_model(file_name):
 
     return model
 
+
+def packaging(output_path, model):
+    '''Returns a path with all directories added to form
+    user defined package structure'''
+
+    path = output_path
+    packages = model.package.name.split('.')
+    for package in packages[:-1]:
+        path = os.path.join(path, package)
+
+    return click.format_filename(path)
+
 if __name__ == '__main__':
     cli()

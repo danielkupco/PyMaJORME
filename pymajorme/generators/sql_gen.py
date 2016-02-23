@@ -3,7 +3,8 @@ import jinja2
 import helpers.javatype as javatype
 import datetime
 import pymajorme_config
-import hashlib 
+import hashlib
+from helpers.pack import pack
 from helpers.constraints import *
 
 TEMPLATE_NAME = 'sql.template'
@@ -22,6 +23,7 @@ def filter_tuple(attribute):
 def filter_primary_keys(attributes, value):
     return [a.name for a in attributes for c in a.column_parameters if c.name == value]
 
+@pack
 def generate(model, output_path):
 
     entities = model.entities
