@@ -162,7 +162,7 @@ public {{ source.collection|collectionGeneric }}<{{ source.type.name }}> get{{ g
 {% endmacro %}
 
 {% macro setOneToMany(source, destination) %}
-    public void add{{ getAttributeNameForRelationSide(source)|capitalize }}({{ getAttributeNameForRelationSide(source)|capitalize }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
+    public void add{{ getAttributeNameForRelationSide(source)|capitalize }}({{ source.type.name }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
 		// prevent endless loop
 		if ({{ getAttributeNameForRelationSide(source)|decapitalize }}s.contains({{ getAttributeNameForRelationSide(source)|decapitalize }}))
 			return;
@@ -172,7 +172,7 @@ public {{ source.collection|collectionGeneric }}<{{ source.type.name }}> get{{ g
 		{{ getAttributeNameForRelationSide(source)|decapitalize }}.set{{ getAttributeNameForRelationSide(destination)|capitalize }}(this);
 	}
 
-	public void remove{{ getAttributeNameForRelationSide(source)|capitalize }}({{ getAttributeNameForRelationSide(source)|capitalize }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
+	public void remove{{ getAttributeNameForRelationSide(source)|capitalize }}({{ source.type.name }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
 		// prevent endless loop
 		if (!{{ getAttributeNameForRelationSide(source)|decapitalize }}s.contains({{ getAttributeNameForRelationSide(source)|decapitalize }}))
 			return;
@@ -185,7 +185,7 @@ public {{ source.collection|collectionGeneric }}<{{ source.type.name }}> get{{ g
 {% endmacro %}
 
 {% macro setManyToMany(source, destination) %}
-    public void add{{ getAttributeNameForRelationSide(source)|capitalize|singularize }}({{ getAttributeNameForRelationSide(source)|capitalize|singularize }} {{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}) {
+    public void add{{ getAttributeNameForRelationSide(source)|capitalize|singularize }}({{ source.type.name }} {{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}) {
 		// prevent endless loop
 		if ({{ getAttributeNameForRelationSide(source)|decapitalize }}.contains({{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}))
 			return;
@@ -195,7 +195,7 @@ public {{ source.collection|collectionGeneric }}<{{ source.type.name }}> get{{ g
 		{{ getAttributeNameForRelationSide(source)|decapitalize }}.add{{ getAttributeNameForRelationSide(source)|capitalize }}(this);
 	}
 
-	public void remove{{ getAttributeNameForRelationSide(source)|capitalize|singularize }}({{ getAttributeNameForRelationSide(source)|capitalize|singularize }} {{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}) {
+	public void remove{{ getAttributeNameForRelationSide(source)|capitalize|singularize }}({{ source.type.name }} {{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}) {
 		// prevent endless loop
 		if (!{{ getAttributeNameForRelationSide(source)|decapitalize }}.contains({{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}))
 			return;
