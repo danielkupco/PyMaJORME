@@ -38,4 +38,4 @@ entity RadProj {
 
 Radnik 1-N RadProj
 RadProj N-1 Projekat
-Projekat 1-1 Radnik as menadzer
+Projekat as project 1-1 Radnik as menager
