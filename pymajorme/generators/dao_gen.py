@@ -41,6 +41,7 @@ def generate(model, package_path):
 
     # Generic dao
     generic_dao_class_rendered = generic_dao_class_template.render({'package': model.package.name,
+                                                                    'context': model.context.name,
                                                                     'date': date})
     generic_dao_interface_rendered = generic_dao_interface_template.render({'package': model.package.name,
                                                                             'date': date})

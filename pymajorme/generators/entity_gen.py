@@ -139,13 +139,12 @@ def singularize(s):
 
 @pack
 def generate(model, package_path):
-
     entities = model.entities
 
     # Initialize template engine.
     jinja_env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True,
-        loader=jinja2.FileSystemLoader(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
-                pymajorme_config.TEMPLATES_DIR))))
+                                   loader=jinja2.FileSystemLoader(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
+                                                                                               pymajorme_config.TEMPLATES_DIR))))
 
     # Register filter for mapping Entity type names to Java type names.
     jinja_env.filters['javatype'] = filter_javatype
