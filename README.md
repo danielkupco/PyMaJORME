@@ -12,6 +12,19 @@ This project is also used as a final project for *Domain Specific Languages* cou
 
 PyMaJORME is written in [Python v3](https://www.python.org, "Official Python page"). DSL is built using [Arpeggio](https://github.com/igordejanovic/Arpeggio "Arpeggio GitHub page") and [TextX](https://github.com/igordejanovic/textX "TextX GitHub page") frameworks for language specification. It also uses [Jinja2](https://github.com/mitsuhiko/jinja2 "Jinja 2 GitHub page") for generating output Java code.
 
+# Installation
+
+git clone the repository: `git clone https://github.com/danielkupco/PyMaJORME.git`
+
+In the repository's home directory (.../PyMaJORMe/pymajorme) run: `pip install .`
+
+And you should have your pymajorme installed as a Python package. :)
+Run `pymajorme --help` to see the usage of program. You can use code in "examples" directory to test it out.
+
+# Basic DSL usage
+
+It should be seen from "examples/entities.jorm" file, but basic two types of DSL are entity and a relation. Relation must use previously defined entities. It is possible to define aditional JPA attributes along with entity/relation, such as cascade type, or an id.
+
 ### Authors:
 * [Daniel Kupčo](https://github.com/danielkupco "Daniel Kupčo's GitHub profile")
 * [Rade Radišić](https://github.com/RadeKornjaca "Rade Radišić's GitHub profile")
