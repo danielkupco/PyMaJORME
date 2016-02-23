@@ -44,7 +44,34 @@ RelationSide:
 ;
 
 RelationType:
-    '->' | '<->' | '--' 
+    OneToOne | OneToMany | ManyToOne | ManyToMany
+;
+
+OneToOne:
+    (src_min_cardinality=MinimalCardinality ':')? src_max_cardinality=MaximalCardinality '-'
+    dst_max_cardinality=MaximalCardinality (':' dst_min_cardinality=MinimalCardinality)?
+;
+
+OneToMany:
+    src_max_cardinality=MaximalCardinality '-'
+    dst_max_cardinality=MaximalCardinality (':' dst_min_cardinality=MinimalCardinality)?
+;
+
+ManyToOne:
+    (src_min_cardinality=MinimalCardinality ':')? src_max_cardinality=MaximalCardinality '-'
+    dst_max_cardinality=MaximalCardinality
+;
+
+ManyToMany:
+    src_max_cardinality=MaximalCardinality '-' dst_max_cardinality=MaximalCardinality
+;
+
+MinimalCardinality:
+    '0' | '1'
+;
+
+MaximalCardinality:
+    '1' | 'N'
 ;
 
 // Database column attributes

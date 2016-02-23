@@ -40,10 +40,10 @@ def relation_based_imports(relations, entity):
 
     for r in relations:
         if r.source.type.name == entity.name:
-            add_import('javax.persistence.' + filter_source_types(r.relation_type))
+            add_import('javax.persistence.' + filter_relation_name(r.relation_type, False))
             add_relation_imports(r.destination)
         if r.destination.type.name == entity.name:
-            add_import('javax.persistence.' + filter_destination_types(r.relation_type))
+            add_import('javax.persistence.' + filter_relation_name(r.relation_type, True))
             add_relation_imports(r.source)
 
 
@@ -60,47 +60,54 @@ def filter_javatype(s):
         }.get(s, s)
 
 
-def filter_collection_generic(collection):
+def filter_collection_generic(collection_value):
     collection_map = {'list': 'List',
                       'set': 'Set',
                       'map': 'Map'}
-    return collection_map.get(collection, collection)
+    return collection_map.get(collection_value, collection_value)
 
 
-def filter_collection_concrete(collection):
+def filter_collection_concrete(collection_value):
     collection_map = {'list': 'ArrayList',
                       'set': 'HashSet',
                       'map': 'HashMap'}
-    return collection_map.get(collection, collection)
+    return collection_map.get(collection_value, collection_value)
 
 
-def filter_source_types(relation_type):
-    relation_types = {'->': 'OneToMany',
-                      '<->': 'ManyToMany',
-                      '--': 'OneToOne'}
-    return relation_types[relation_type]
+def filter_relation_symbol(relation_type, flip=False):
+    src_max = relation_type.src_max_cardinality
+    dst_max = relation_type.dst_max_cardinality
+
+    if src_max == '1' and dst_max == '1':
+        relation_symbol = '--'
+    elif src_max == '1' and dst_max == 'N':
+        relation_symbol = '->' if not flip else '<-'
+    elif src_max == 'N' and dst_max == '1':
+        relation_symbol = '<-' if not flip else '->'
+    elif src_max == 'N' and dst_max == 'N':
+        relation_symbol = '<->'
+    else:
+        relation_symbol = '--'
+
+    return relation_symbol
 
 
-def filter_destination_types(relation_type):
-    relation_types = {'->': 'ManyToOne',
-                      '<->': 'ManyToMany',
-                      '--': 'OneToOne'}
-    return relation_types[relation_type]
+def filter_relation_name(relation_type, flip):
+    relation_symbol = filter_relation_symbol(relation_type, flip)
+    relation_names = {'--': 'OneToOne',
+                      '->': 'OneToMany',
+                      '<-': 'ManyToOne',
+                      '<->': 'ManyToMany'}
+    return relation_names[relation_symbol]
 
 
-def filter_source_attribute(relation_side, relation_type):
-    name = relation_side.type.name if relation_side.name == '' else relation_side.name
-    relation_types = {'->': collection(relation_side),
-                      '<->': collection(relation_side),
-                      '--': single(relation_side)}
-    return relation_types[relation_type]
-
-
-def filter_destination_attribute(relation_side, relation_type):
-    relation_types = {'->': single(relation_side),
-                      '<->': collection(relation_side),
-                      '--': single(relation_side)}
-    return relation_types[relation_type]
+def filter_relation_attribute(relation_side, relation_type, flip):
+    relation_symbol = filter_relation_symbol(relation_type, flip)
+    relation_attributes = {'--': single(relation_side),
+                           '->': single(relation_side),
+                           '<-': collection(relation_side),
+                           '<->': collection(relation_side)}
+    return relation_attributes[relation_symbol]
 
 
 def single(relation_side):
@@ -123,6 +130,7 @@ def collection(relation_side):
 def decapitalize(s):
     return s[0].lower() + s[1:]
 
+
 @pack
 def generate(model, package_path):
 
@@ -137,12 +145,10 @@ def generate(model, package_path):
     jinja_env.filters['javatype'] = filter_javatype
     jinja_env.filters['collectionGeneric'] = filter_collection_generic
     jinja_env.filters['collectionConcrete'] = filter_collection_concrete
-    jinja_env.filters['source_types'] = filter_source_types
-    jinja_env.filters['destination_types'] = filter_destination_types
+    jinja_env.filters['relation_name'] = filter_relation_name
     jinja_env.filters['source'] = lambda relations, entity: [r for r in relations if entity.name == r.source.type.name]
     jinja_env.filters['destination'] = lambda relations, entity: [r for r in relations if entity.name == r.destination.type.name]
-    jinja_env.filters['source_attribute'] = filter_source_attribute
-    jinja_env.filters['destination_attribute'] = filter_destination_attribute
+    jinja_env.filters['relation_attribute'] = filter_relation_attribute
     jinja_env.filters['decapitalize'] = decapitalize
 
     # Load Java template
