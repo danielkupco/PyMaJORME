@@ -22,7 +22,7 @@ def cli(entity, dao, persistence, all_above, root, source, output_path):
     model = load_model(click.format_filename(source))
 
     if root:
-        output_path = os.path.join(output_path, 'pyma_gen')
+        output_path = packaging(output_path, model)
 
     # passing model to specific generators
     if entity:
@@ -67,9 +67,10 @@ def packaging(output_path, model):
     '''Returns a path with all directories added to form
        user defined package structure'''
 
+    path = output_path
     packages = model.package.name.split('.')
-    for package in packages:
-        path = os.path.join(output_path, package)
+    for package in packages[:-1]:
+        path = os.path.join(path, package)
 
     return click.format_filename(path)
 
