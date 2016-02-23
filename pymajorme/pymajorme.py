@@ -7,17 +7,18 @@ import helpers.javatype as javatype
 import generators.entity_gen as entity_gen
 import generators.dao_gen as dao_gen
 import generators.persistence_xml_gen as persistence_xml
-
+import generators.sql_gen as sql_gen
 
 @click.command()
 @click.option('-e', '--entity', is_flag=True, help='Generate entity classes')
 @click.option('-d', '--dao', is_flag=True, help='Generate Dao layer')
 @click.option('-p', '--persistence', is_flag=True, help='Generate persistence.xml file')
+@click.option('-s', '--sql', is_flag=True, help='Generate SQL script')
 @click.option('-a', '--all', 'all_above', is_flag=True, help='Generate all previous')     # apparently, "all" is reserved keyword in Python
 @click.option('-r', '--root', is_flag=True, help='Make a root directory for generated code')
 @click.argument('source', nargs=1, type=click.Path(exists=True))
 @click.argument('output_path', nargs=1, type=click.Path(exists=True))
-def cli(entity, dao, persistence, all_above, root, source, output_path):
+def cli(entity, dao, persistence, sql, all_above, root, source, output_path):
 
     model = load_model(click.format_filename(source))
 
@@ -31,10 +32,13 @@ def cli(entity, dao, persistence, all_above, root, source, output_path):
         dao_gen.generate(model, output_path)
     elif persistence:
         persistence_xml.generate(model, output_path)
+    elif sql:
+        sql_gen.generate(model, output_path)
     elif all_above:
         entity_gen.generate(model, output_path)
         dao_gen.generate(model, output_path)
         persistence_xml.generate(model, output_path)
+        sql_gen.generate(model, output_path)
 
 def load_model(file_name):
     """Generates program model from '/examples' and returns it."""
@@ -42,7 +46,7 @@ def load_model(file_name):
     # current_dir = os.path.dirname(__file__)
     # __file__ is unbound in interactive mode
 
-    current_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.realpath(__file__)) 
     visualization_dir = os.path.join(current_dir, pymajorme_config.VISUALIZATION_DIR)
     if not os.path.exists(visualization_dir):
         os.makedirs(visualization_dir)
@@ -62,16 +66,6 @@ def load_model(file_name):
 
     return model
 
-
-def packaging(output_path, model):
-    '''Returns a path with all directories added to form
-       user defined package structure'''
-
-    packages = model.package.name.split('.')
-    for package in packages:
-        path = os.path.join(output_path, package)
-
-    return click.format_filename(path)
 
 if __name__ == '__main__':
     cli()
