@@ -15,7 +15,7 @@ public abstract class GenericDao<T, ID extends Serializable> extends Observable 
 
 	private Class<T> entityType;
 
-	@PersistenceContext(unitName = "SIKS")
+	@PersistenceContext(unitName = "{{context}}")
 	protected static EntityManager em;
 
 	@SuppressWarnings("unchecked")

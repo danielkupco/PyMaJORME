@@ -23,7 +23,7 @@ def cli(entity, dao, persistence, sql, all_above, root, source, output_path):
     model = load_model(click.format_filename(source))
 
     if root:
-        output_path = os.path.join(output_path, 'pyma_gen')
+        output_path = packaging(output_path, model)
 
     # passing model to specific generators
     if entity:
@@ -65,7 +65,6 @@ def load_model(file_name):
     model_export(model, os.path.join(visualization_dir, 'jorm_model.dot'))
 
     return model
-
 
 if __name__ == '__main__':
     cli()

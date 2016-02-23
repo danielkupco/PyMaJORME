@@ -5,24 +5,17 @@
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.1"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence   http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 
-    <persistence-unit name="SIKS" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="{{context}}" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <properties>
 
             <!-- MySQL configuration -->
-            <!-- <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/siks_db" />
-            <property name="javax.persistence.jdbc.user" value="siks" />
-            <property name="javax.persistence.jdbc.password" value="siks" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/{{db_name}}" />
+            <property name="javax.persistence.jdbc.user" value="{{username}}" />
+            <property name="javax.persistence.jdbc.password" value="{{password}}" />
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" /> -->
-
-            <!-- Derby configuration -->
-            <property name="javax.persistence.jdbc.url" value="jdbc:derby:SIKS_DB;create=true"/>
-            <property name="javax.persistence.jdbc.user" value="siks"/>
-            <property name="javax.persistence.jdbc.password" value="siks"/>
-            <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
 
             <property name="hibernate.show_sql" value="false"/>
             <property name="hibernate.format_sql" value="true"/>

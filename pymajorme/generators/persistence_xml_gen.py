@@ -2,10 +2,11 @@ import os
 import pymajorme_config
 import jinja2
 import datetime
+from helpers.pack import pack
 
 TEMPLATE_NAME = 'persistence_xml.template'
 
-
+@pack
 def generate(model, output_path):
 
     # Initialize template engine.
@@ -18,7 +19,11 @@ def generate(model, output_path):
 
     date = datetime.datetime.now().strftime('%d.%m.%Y. %H:%M:%S')
 
-    rendered = template.render({'date': date})
+    rendered = template.render({'date': date,
+                                'context': model.context.name,
+                                'db_name': model.db_name.name,
+                                'username': model.username.name,
+                                'password': model.password.name})
 
     meta_inf_dir = os.path.join(output_path, 'META-INF')
     if not os.path.exists(meta_inf_dir):

@@ -6,17 +6,36 @@
 
 ORModel:
     package=Package
+    context=Context
+    db_name=DB_Name
+    username=Username
+    password=Password
     entities+=Entity
     relations+=Relation
 ;
 
 Package:
-    'package' name=/(\w+\.)*(\w+)/
+    'package' '=' name=/(\w+\.)*(\w+)/
 ;
 
+Context:
+    'context' '=' name=ID
+;
+
+DB_Name:
+    'db_name' '=' name=ID
+;
+
+Username:
+    'username' '=' name=ID
+;
+
+Password:
+    'password' '=' name=ID
+;
 Entity:
     'entity' name=ID '{'
-        attributes+=Attribute
+        attributes*=Attribute
     '}'
 ;
 
@@ -29,7 +48,7 @@ Attribute:
 ;
 
 Collection:
-    'set' | 'list' | 'map'
+    'set' | 'list'
 ;
 
 // Relations
