@@ -1,25 +1,150 @@
 /*
-  This is a textX specification of pymajorme_language.tx DSL for generating ORM layer for Java applications.
+  This is a textX specification of pymajorme DSL for generating ORM layer for Java applications.
   Authors: Rade Radišić <radisic DOT rade AT gmail DOT com>
            Daniel Kupčo <kupcodandroid AT gmail DOT com>
 */
 
 ORModel:
+    package=Package
+    context=Context
+    db_name=DB_Name
+    username=Username
+    password=Password
     entities+=Entity
+    relations+=Relation
 ;
 
+Package:
+    'package' '=' name=/(\w+\.)*(\w+)/
+;
+
+Context:
+    'context' '=' name=ID
+;
+
+DB_Name:
+    'db_name' '=' name=ID
+;
+
+Username:
+    'username' '=' name=ID
+;
+
+Password:
+    'password' '=' name=ID
+;
 Entity:
     'entity' name=ID '{'
-        attributes+=Attribute
+        attributes*=Attribute
     '}'
 ;
 
+JavaType:
+    name=ID
+;
+
 Attribute:
-    name=ID ':' type=[Entity] ('as' Collection)?
+    type=[JavaType] name=ID ('<' collection=Collection '>')? ('[' column_parameters*=DBColumnParameter[','] ']')?
 ;
 
 Collection:
-    'set' | 'list' | 'map'
+    'set' | 'list'
+;
+
+// Relations
+
+Relation:
+    source=RelationSide relation_type=RelationType destination=RelationSide
+;
+
+RelationSide:
+    type=[Entity] ('<' collection=Collection '>')? ('as' name=ID)?
+    ('[' (fk_column_parameters*=FKColumnParameter[','])? ':' (join_column_parameters*=JoinColumnParameter[','])? ']')?
+;
+
+RelationType:
+    OneToOne | OneToMany | ManyToOne | ManyToMany
+;
+
+OneToOne:
+    (src_min_cardinality=MinimalCardinality ':')? src_max_cardinality=MaximalCardinality '-'
+    dst_max_cardinality=MaximalCardinality (':' dst_min_cardinality=MinimalCardinality)?
+;
+
+OneToMany:
+    src_max_cardinality=MaximalCardinality '-'
+    dst_max_cardinality=MaximalCardinality (':' dst_min_cardinality=MinimalCardinality)?
+;
+
+ManyToOne:
+    (src_min_cardinality=MinimalCardinality ':')? src_max_cardinality=MaximalCardinality '-'
+    dst_max_cardinality=MaximalCardinality
+;
+
+ManyToMany:
+    src_max_cardinality=MaximalCardinality '-' dst_max_cardinality=MaximalCardinality
+;
+
+MinimalCardinality:
+    '0' | '1'
+;
+
+MaximalCardinality:
+    '1' | 'N'
+;
+
+// Database column attributes
+
+DBColumnParameter:
+    ColGUID | ColName | ColUnique | ColNullable
+;
+
+FKColumnParameter:
+    Cascade | Fetch
+;
+
+JoinColumnParameter:
+    ReferencedColumn | DBColumnParameter
+;
+
+ColGUID:
+    name='GUID'
+;
+
+ColName:
+    name='name' '=' value=ID
+;
+
+ColUnique:
+    name='unique' '=' value=TrueFalse
+;
+
+ColNullable:
+    name='nullable' '=' value=TrueFalse
+;
+
+TrueFalse:
+    'true' | 'false'
+;
+
+Cascade:
+    name='cascade' '=' '{' values+=CascadeValues[','] '}'
+;
+
+CascadeValues:
+    'ALL' | ('DETACH' | 'MERGE' | 'PERSIST' | 'REFRESH' | 'REMOVE')
+;
+
+Fetch:
+    name='fetch' '=' value=FetchValues
+;
+
+FetchValues:
+    'LAZY' | 'EAGER'
+;
+
+ReferencedColumn:
+    name='referencedColumnName' '=' value=ID
 ;
 
 // Special rule for comments. Comments start with //

@@ -1,0 +1,244 @@
+{% macro getAttributeName(attribute) %}
+    {% if attribute.column_parameters|selectattr("name", "equalto", "name")|list|count > 0 -%}
+    {#- uzima se poslednji name atribut, ako nije definisan uzima se naziv atributa za naziv kolone -#}
+    name = "{{(attribute.column_parameters|selectattr("name", "equalto", "name")|list|last).value}}"
+    {%- else -%}
+    name = "{{attribute.name}}"
+    {%- endif -%}
+{% endmacro -%}
+
+{% macro getAttributeNameForRelationSide(relation_side) %}
+    {% if relation_side.join_column_parameters|selectattr("name", "equalto", "name")|list|count > 0 -%}
+    {#- uzima se poslednji name atribut, ako nije definisan uzima se naziv atributa za naziv kolone -#}
+    {{(relation_side.join_column_parameters|selectattr("name", "equalto", "name")|list|last).value}}
+    {%- elif relation_side.name -%}
+    {{relation_side.name}}
+    {%- else -%}
+    {{relation_side.type.name}}{% if relation_side.collection %}s{% endif %}
+    {%- endif -%}
+{% endmacro -%}
+
+{% macro relationAnnotations(sourceSide, destinationSide, relation_type, reverse) %}
+    {% if destinationSide.fk_column_parameters %}(
+    {%- for param in destinationSide.fk_column_parameters %}
+    {%- if param.name == "cascade" -%}
+    cascade = {
+    {%- for cascade in param.values -%}
+    {%- if not loop.first %}, {% endif %}{{cascade}}
+    {%- endfor %}}
+    {%- else %}
+    {%- if not loop.first %}, {% endif %}{{param.name}} = {{param.value}}
+    {%- endif %}
+    {% endfor -%}
+
+    , targetEntity = {{destinationSide.type.name}}.class
+
+    {#- and reverse because one sided mappedBy is enough -#}
+    {%- if not relation_type|relation_name(reverse) == 'ManyToOne' and reverse -%}
+    , mappedBy = "{{ getAttributeNameForRelationSide(sourceSide)|decapitalize }}"
+    {%- endif -%}
+
+    {# Optional attribute based on minimal cardinality #}
+    {% if relation_type|relation_name(reverse) == 'OneToOne' or relation_type|relation_name(reverse) == 'ManyToOne' %}
+
+    {%- if relation_type.src_min_cardinality and reverse -%}
+    , optional =
+    {%- if relation_type.src_min_cardinality == '0' -%}
+    {{ ' true' }}
+    {%- elif relation_type.src_min_cardinality == '1' -%}
+    {{ ' false' }}
+    {%- endif %}
+    {% endif %}
+
+    {%- if relation_type.dst_min_cardinality and not reverse -%}
+    , optional =
+    {%- if relation_type.dst_min_cardinality == '0' -%}
+    {{ ' true' }}
+    {%- elif relation_type.dst_min_cardinality == '1' -%}
+    {{ ' false' }}
+    {%- endif %}
+    {% endif %}
+    {% endif %})
+
+
+    {#- Optional attribute based on minimal cardinality if non of attributes are defined #}
+    {%- elif relation_type|relation_name(reverse) == 'OneToOne' or relation_type|relation_name(reverse) == 'ManyToOne' -%}
+    (targetEntity = {{destinationSide.type.name}}.class
+
+    {#- and reverse because one sided mappedBy is enough -#}
+    {%- if not relation_type|relation_name(reverse) == 'ManyToOne' and reverse -%}
+    , mappedBy = "{{ getAttributeNameForRelationSide(sourceSide)|decapitalize }}"
+    {%- endif -%}
+
+    {%- if relation_type.src_min_cardinality and reverse -%}
+    , optional =
+    {%- if relation_type.src_min_cardinality == '0' -%}
+    {{ ' true' }}
+    {%- elif relation_type.src_min_cardinality == '1' -%}
+    {{ ' false' }}
+    {%- endif %})
+    {%- endif %}
+
+    {%- if relation_type.dst_min_cardinality and not reverse -%}
+    , optional =
+    {%- if relation_type.dst_min_cardinality == '0' -%}
+    {{ ' true' }}
+    {%- elif relation_type.dst_min_cardinality == '1' -%}
+    {{ ' false' }}
+    {%- endif %}
+    {%- endif %})
+    {%- endif %}
+
+    @JoinColumn(name = "{{getAttributeNameForRelationSide(destinationSide)}}"
+    {%- if relation_type == 'ManyToOne' -%}
+    , referencedColumnName = "
+    {%- if sourceSide.join_column_atributes|selectattr("name", "equalto", "referencedColumnName")|list|count > 0 -%}
+    {{- (sourceSide.join_column_atributes|selectattr("name", "equalto", "referencedColumnName")|list|first).value }}
+    {%- else -%}
+    id
+    {%- endif %}"
+    {%- endif -%}
+    {%- if destinationSide.join_column_parameters %}
+    {%- for param in destinationSide.join_column_parameters|rejectattr("name", "equalto", "name")|rejectattr("name", "equalto", "referencedColumnName") -%}
+    , {{param.name}} = {{param.value}}
+    {%- endfor %}
+    {% endif -%})
+{%- endmacro %}
+
+{% macro getOne(source) %}
+public {{ source.type.name }} get{{ getAttributeNameForRelationSide(source)|capitalize }}() {
+        return {{ getAttributeNameForRelationSide(source)|decapitalize }};
+    }
+{% endmacro %}
+
+{% macro getMany(source) %}
+public {{ source.collection|collectionGeneric }}<{{ source.type.name }}> get{{ getAttributeNameForRelationSide(source)|capitalize }}s() {
+        // defensive copy, nobody will be able to change the
+		// set from the outside
+        return new {{ source.collection|collectionConcrete }}<{{ source.type.name }}>({{ getAttributeNameForRelationSide(source)|decapitalize }}s);
+    }
+{% endmacro %}
+
+{% macro setOneToOne(source, destination) %}
+    public void set{{ getAttributeNameForRelationSide(source)|capitalize }}({{ source.type.name }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
+        // prevent endless loop
+		if (is{{ getAttributeNameForRelationSide(source)|capitalize }}SameAs({{ getAttributeNameForRelationSide(source)|decapitalize }}))
+			return;
+		// set new {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		{{ source.type.name }} old{{ getAttributeNameForRelationSide(source)|capitalize }} = this.{{ getAttributeNameForRelationSide(source)|decapitalize }};
+		this.{{ getAttributeNameForRelationSide(source)|decapitalize }} = {{ getAttributeNameForRelationSide(source)|decapitalize }};
+		// remove from the old {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		if (old{{ getAttributeNameForRelationSide(source)|capitalize }} != null)
+			old{{ getAttributeNameForRelationSide(source)|capitalize }}.set{{ getAttributeNameForRelationSide(destination)|capitalize }}(null);
+		// set myself to new {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		if ({{ getAttributeNameForRelationSide(source)|decapitalize }} != null)
+			{{ getAttributeNameForRelationSide(source)|decapitalize }}.set{{ getAttributeNameForRelationSide(destination)|capitalize }}(this);
+	}
+
+	public boolean is{{ getAttributeNameForRelationSide(source)|capitalize }}SameAs({{ source.type.name }} new{{ getAttributeNameForRelationSide(source)|capitalize }}) {
+	    return {{ getAttributeNameForRelationSide(source)|decapitalize }} == null ? new{{ getAttributeNameForRelationSide(source)|capitalize }} == null : {{ getAttributeNameForRelationSide(source)|decapitalize }}.equals(new{{ getAttributeNameForRelationSide(source)|capitalize }});
+	}
+{% endmacro %}
+
+{% macro setManyToOne(source, destination) %}
+    public void set{{ getAttributeNameForRelationSide(source)|capitalize }}({{ source.type.name }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
+        // prevent endless loop
+		if (is{{ getAttributeNameForRelationSide(source)|capitalize }}SameAs({{ getAttributeNameForRelationSide(source)|decapitalize }}))
+			return;
+		// set new {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		{{ source.type.name }} old{{ getAttributeNameForRelationSide(source)|capitalize }} = this.{{ getAttributeNameForRelationSide(source)|decapitalize }};
+		this.{{ getAttributeNameForRelationSide(source)|decapitalize }} = {{ getAttributeNameForRelationSide(source)|decapitalize }};
+		// remove from the old {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		if (old{{ getAttributeNameForRelationSide(source)|capitalize }} != null)
+			old{{ getAttributeNameForRelationSide(source)|capitalize }}.remove{{ getAttributeNameForRelationSide(destination)|capitalize }}(this);
+		// set myself to new {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		if ({{ getAttributeNameForRelationSide(source)|decapitalize }} != null)
+			{{ getAttributeNameForRelationSide(source)|decapitalize }}.add{{ getAttributeNameForRelationSide(destination)|capitalize }}(this);
+	}
+
+	public boolean is{{ getAttributeNameForRelationSide(source)|capitalize }}SameAs({{ source.type.name }} new{{ getAttributeNameForRelationSide(source)|capitalize }}) {
+	    return {{ getAttributeNameForRelationSide(source)|decapitalize }} == null ? new{{ getAttributeNameForRelationSide(source)|capitalize }} == null : {{ getAttributeNameForRelationSide(source)|decapitalize }}.equals(new{{ getAttributeNameForRelationSide(source)|capitalize }});
+	}
+{% endmacro %}
+
+{% macro setOneToMany(source, destination) %}
+    public void add{{ getAttributeNameForRelationSide(source)|capitalize }}({{ getAttributeNameForRelationSide(source)|capitalize }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
+		// prevent endless loop
+		if ({{ getAttributeNameForRelationSide(source)|decapitalize }}s.contains({{ getAttributeNameForRelationSide(source)|decapitalize }}))
+			return;
+		// add new {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}s.add({{ getAttributeNameForRelationSide(source)|decapitalize }});
+		// set myself into the {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}.set{{ getAttributeNameForRelationSide(destination)|capitalize }}(this);
+	}
+
+	public void remove{{ getAttributeNameForRelationSide(source)|capitalize }}({{ getAttributeNameForRelationSide(source)|capitalize }} {{ getAttributeNameForRelationSide(source)|decapitalize }}) {
+		// prevent endless loop
+		if (!{{ getAttributeNameForRelationSide(source)|decapitalize }}s.contains({{ getAttributeNameForRelationSide(source)|decapitalize }}))
+			return;
+		// remove the {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}s.remove({{ getAttributeNameForRelationSide(source)|decapitalize }});
+		// remove myself from the {{ getAttributeNameForRelationSide(source)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}.set{{ getAttributeNameForRelationSide(destination)|capitalize }}(null);
+	}
+
+{% endmacro %}
+
+{% macro setManyToMany(source, destination) %}
+    public void add{{ getAttributeNameForRelationSide(source)|capitalize|singularize }}({{ getAttributeNameForRelationSide(source)|capitalize|singularize }} {{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}) {
+		// prevent endless loop
+		if ({{ getAttributeNameForRelationSide(source)|decapitalize }}.contains({{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}))
+			return;
+		// add new {{ getAttributeNameForRelationSide(destination)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}.add({{ getAttributeNameForRelationSide(source)|decapitalize|singularize }});
+		// set myself into the {{ getAttributeNameForRelationSide(destination)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}.add{{ getAttributeNameForRelationSide(source)|capitalize }}(this);
+	}
+
+	public void remove{{ getAttributeNameForRelationSide(source)|capitalize|singularize }}({{ getAttributeNameForRelationSide(source)|capitalize|singularize }} {{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}) {
+		// prevent endless loop
+		if (!{{ getAttributeNameForRelationSide(source)|decapitalize }}.contains({{ getAttributeNameForRelationSide(source)|decapitalize|singularize }}))
+			return;
+		// remove the {{ getAttributeNameForRelationSide(destination)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}.remove({{ getAttributeNameForRelationSide(source)|decapitalize|singularize }});
+		// remove myself from the {{ getAttributeNameForRelationSide(destination)|decapitalize }}
+		{{ getAttributeNameForRelationSide(source)|decapitalize }}.remove{{ getAttributeNameForRelationSide(source)|capitalize }}(null);
+	}
+
+{% endmacro %}
+
+{% macro forAllRelationTypes(relation, reverse) %}
+    {%- if relation.relation_type|relation_name(reverse) == 'OneToOne' %}
+    {%- if reverse %}
+    {{ getOne(relation.source) }}
+{{ setOneToOne(relation.source, relation.destination) }}
+    {%- else %}
+    {{ getOne(relation.destination) }}
+{{ setOneToOne(relation.destination, relation.source) }}
+    {%- endif %}
+    {%- elif relation.relation_type|relation_name(reverse) == 'OneToMany' %}
+    {%- if reverse %}
+    {{ getMany(relation.source) }}
+{{ setOneToMany(relation.source, relation.destination) }}
+    {%- else %}
+    {{ getMany(relation.destination) }}
+{{ setOneToMany(relation.destination, relation.source) }}
+    {%- endif %}
+    {%- elif relation.relation_type|relation_name(reverse) == 'ManyToOne' %}
+    {%- if reverse %}
+    {{ getOne(relation.source) }}
+{{ setManyToOne(relation.source, relation.destination) }}
+    {%- else %}
+    {{ getOne(relation.destination) }}
+{{ setManyToOne(relation.destination, relation.source) }}
+    {%- endif %}
+    {%- elif relation.relation_type|relation_name(reverse) == 'ManyToMany' %}
+    {%- if reverse %}
+    {{ getMany(relation.source) }}
+{{ setManyToMany(relation.source, relation.destination) }}
+    {%- else %}
+    {{ getMany(relation.destination) }}
+{{ setManyToMany(relation.destination, relation.source) }}
+    {%- endif %}
+    {% endif %}
+{% endmacro %}
