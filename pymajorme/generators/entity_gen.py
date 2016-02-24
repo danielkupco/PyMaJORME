@@ -7,58 +7,54 @@ from helpers.pack import pack
 from helpers.pack import package_path_for_template
 
 TEMPLATE_NAME = 'entity.template'
+imports = []
+
 
 def initialize_imports():
-    imports = []
     imports.clear()
     imports.append('java.io.Serializable')
     imports.append('javax.persistence.Entity')
     imports.append('javax.persistence.Table')
     imports.append('javax.persistence.Column')
     imports.append('javax.persistence.JoinColumn')
-    return imports
 
 
-def add_import(imports, value):
+def add_import(value):
     if not imports.__contains__(value):
         imports.append(value)
-    return imports
 
-def relation_based_imports(imports, relations, entity):
+
+def relation_based_imports(relations, entity):
 
     def add_relation_imports(relation_side):
         if hasattr(relation_side, 'collection') and relation_side.collection is not None:
-            add_import(imports, 'java.util.{}'.format(filter_collection_generic(relation_side.collection)))
-            add_import(imports, 'java.util.{}'.format(filter_collection_concrete(relation_side.collection)))
+            add_import('java.util.{}'.format(filter_collection_generic(relation_side.collection)))
+            add_import('java.util.{}'.format(filter_collection_concrete(relation_side.collection)))
 
         if hasattr(relation_side, 'fk_column_parameters'):
             for param in relation_side.fk_column_parameters:
                 # cascade
                 if param.name == 'cascade':
                     for cascade in param.values:
-                        add_import(imports, 'static javax.persistence.CascadeType.{}'.format(cascade))
+                        add_import('static javax.persistence.CascadeType.{}'.format(cascade))
                 # fetch
                 if param.name == 'fetch':
-                    add_import(imports, 'static javax.persistence.FetchType.{}'.format(param.value))
+                    add_import('static javax.persistence.FetchType.{}'.format(param.value))
 
     for r in relations:
         if r.source.type.name == entity.name:
-            add_import(imports, 'javax.persistence.' + filter_relation_name(r.relation_type, False))
+            add_import('javax.persistence.' + filter_relation_name(r.relation_type, False))
             add_relation_imports(r.destination)
-            print(filter_relation_name(r.relation_type, False))
-            if filter_relation_name(r.relation_type, False) == 'OneToMany':
-                add_r_imports(imports, 'java.util.Set')
-                print('wwww')
-                add_relation_imports(imports, 'java.util.HashSet')
+            if filter_relation_name(r.relation_type, False) == 'OneToMany' or filter_relation_name(r.relation_type, False) == 'ManyToMany':
+                add_import('java.util.Set')
+                add_import('java.util.HashSet')
 
         if r.destination.type.name == entity.name:
-            add_import(imports, 'javax.persistence.' + filter_relation_name(r.relation_type, True))
+            add_import('javax.persistence.' + filter_relation_name(r.relation_type, True))
             add_relation_imports(r.source)
-            if filter_relation_symbol(r.relation_type, True) == '->' or filter_relation_symbol(r.relation_type, True) == '<->':
-                add_relation_imports(imports, 'java.util.{}'.format(filter_collection_generic('set')))
-                add_relation_imports(imports, 'java.util.{}'.format(filter_collection_concrete('set')))
-
-    return imports
+            if filter_relation_name(r.relation_type, False) == 'ManyToOne' or filter_relation_name(r.relation_type, False) == 'ManyToMany':
+                add_import('java.util.Set')
+                add_import('java.util.HashSet')
 
 def filter_javatype(s):
         '''
@@ -186,26 +182,22 @@ def generate(model, package_path):
         relations = model.relations
 
         # clear, initialize and resolve relation based imports
-        imports = initialize_imports()
-        relation_based_imports(imports, relations, entity)
+        initialize_imports()
+        relation_based_imports(relations, entity)
 
         for attr in entity.attributes:
             if hasattr(attr, 'column_parameters'):
                 for prm in attr.column_parameters:
                     if prm.name == 'GUID':
-                        add_import(imports, 'javax.persistence.Id')
-                        add_import(imports, 'javax.persistence.GeneratedValue')
-                        add_import(imports, 'static javax.persistence.GenerationType.IDENTITY')
+                        add_import('javax.persistence.Id')
+                        add_import('javax.persistence.GeneratedValue')
+                        add_import('static javax.persistence.GenerationType.IDENTITY')
 
         rendered = template.render({'entity': entity,
                                     'relations': relations,
                                     'date': date,
                                     'package': package_path_for_template(package_path),
                                     'imports': imports})
-
-        print()
-        for imp in imports:
-            print(imp)
 
         # For each entity generate java file
         with open(os.path.join(package_path, '{}.java'.format(entity.name)), 'w') as f:

@@ -3,7 +3,7 @@
 
 package {{package}};
 
-import {{entity_package}};
+import {{entity_package}}.{{entity}};
 
 public interface I{{entity}}Dao extends IGenericDao<{{entity}}, {{id_type}}> {
 

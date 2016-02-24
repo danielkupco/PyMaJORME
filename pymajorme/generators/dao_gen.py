@@ -9,6 +9,7 @@ CLASS_TEMPLATE_NAME = 'dao_class.template'
 INTERFACE_TEMPLATE_NAME = 'dao_interface.template'
 GENERIC_DAO_CLASS_TEMPLATE_NAME = 'generic_dao_class.template'
 GENERIC_DAO_INTERFACE_TEMPLATE_NAME = 'generic_dao_interface.template'
+EM_FACTORY_TEMPLATE_NAME = 'em_factory.template'
 imports = []
 
 
@@ -32,6 +33,7 @@ def generate(model, package_path):
 
     generic_dao_class_template = jinja_env.get_template(GENERIC_DAO_CLASS_TEMPLATE_NAME)
     generic_dao_interface_template = jinja_env.get_template(GENERIC_DAO_INTERFACE_TEMPLATE_NAME)
+    em_factory_template = jinja_env.get_template(EM_FACTORY_TEMPLATE_NAME)
 
     date = datetime.datetime.now().strftime('%d.%m.%Y. %H:%M:%S')
 
@@ -49,11 +51,16 @@ def generate(model, package_path):
     generic_dao_interface_rendered = generic_dao_interface_template.render({'package': package_path_for_template(package_path),
                                                                             'entity_package': package_path_for_template(entity_package),
                                                                             'date': date})
+    em_factory_rendered = em_factory_template.render({'package': package_path_for_template(package_path),
+                                                      'context': model.context.name,
+                                                      'date': date})
     # generate java file
     with open(os.path.join(package_path, 'GenericDao.java'), 'w') as f:
         f.write(generic_dao_class_rendered)
     with open(os.path.join(package_path, 'IGenericDao.java'), 'w') as f:
         f.write(generic_dao_interface_rendered)
+    with open(os.path.join(package_path, 'EntityManagerController.java'), 'w') as f:
+        f.write(em_factory_rendered)
 
     id_type = ''
 

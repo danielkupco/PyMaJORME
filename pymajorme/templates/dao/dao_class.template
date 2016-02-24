@@ -4,7 +4,7 @@
 package {{package}};
 
 import javax.persistence.Query;
-import {{entity_package}};
+import {{entity_package}}.{{entity}};
 
 public class {{entity}}Dao extends GenericDao<{{entity}}, {{id_type}}> implements I{{entity}}Dao {
 
