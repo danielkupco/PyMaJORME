@@ -3,6 +3,7 @@ import pymajorme_config
 import jinja2
 import datetime
 from helpers.pack import pack
+from helpers.pack import package_path_for_template
 
 CLASS_TEMPLATE_NAME = 'dao_class.template'
 INTERFACE_TEMPLATE_NAME = 'dao_interface.template'
@@ -34,16 +35,19 @@ def generate(model, package_path):
 
     date = datetime.datetime.now().strftime('%d.%m.%Y. %H:%M:%S')
 
+    entity_package = os.path.join(package_path, 'entity')
     # Create dao directory
     package_path = os.path.join(package_path, 'dao')
     if not os.path.exists(package_path):
         os.mkdir(package_path)
 
     # Generic dao
-    generic_dao_class_rendered = generic_dao_class_template.render({'package': model.package.name,
+    generic_dao_class_rendered = generic_dao_class_template.render({'package': package_path_for_template(package_path),
+                                                                    'entity_package': package_path_for_template(entity_package),
                                                                     'context': model.context.name,
                                                                     'date': date})
-    generic_dao_interface_rendered = generic_dao_interface_template.render({'package': model.package.name,
+    generic_dao_interface_rendered = generic_dao_interface_template.render({'package': package_path_for_template(package_path),
+                                                                            'entity_package': package_path_for_template(entity_package),
                                                                             'date': date})
     # generate java file
     with open(os.path.join(package_path, 'GenericDao.java'), 'w') as f:
@@ -68,12 +72,14 @@ def generate(model, package_path):
         class_rendered = class_template.render({'entity': entity.name,
                                                 'id_type': id_type,
                                                 'date': date,
-                                                'package': model.package.name})
+                                                'package': package_path_for_template(package_path),
+                                                'entity_package': package_path_for_template(entity_package)})
 
         interface_rendered = interface_template.render({'entity': entity.name,
                                                         'id_type': id_type,
                                                         'date': date,
-                                                        'package': model.package.name})
+                                                        'package': package_path_for_template(package_path),
+                                                        'entity_package': package_path_for_template(entity_package)})
 
         # For each entity generate java file
         with open(os.path.join(package_path, '{}Dao.java'.format(entity.name)), 'w') as f:

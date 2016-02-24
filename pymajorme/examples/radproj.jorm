@@ -1,0 +1,24 @@
+// This is the referent syntax example
+
+context = JSD
+db_name = DB_JSD
+username = jsd
+password = jsd
+
+entity Radnik {
+    Integer id [ GUID ]
+    String name
+}
+
+entity Projekat {
+    Integer id [ GUID ]
+    String name
+}
+
+entity RadProj {
+    Integer id [ GUID ]
+}
+
+Radnik 1-N RadProj
+RadProj N-1 Projekat
+Projekat as project 1-1 Radnik as menager

@@ -5,7 +5,7 @@
 */
 
 ORModel:
-    package=Package
+    (package=Package)?
     context=Context
     db_name=DB_Name
     username=Username
