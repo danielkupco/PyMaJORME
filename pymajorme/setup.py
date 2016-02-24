@@ -2,8 +2,24 @@ from setuptools import setup
 
 setup(
     name='pymajorme',
-    version='0.2',
-    py_modules=['pymajorme'],
+    version='0.2.2',
+    include_package_data=True,
+    py_modules=['pymajorme', 
+                'pymajorme_config',
+    ],
+    packages=['helpers',
+              'generators',
+              'languages',
+              'templates'
+    ],
+    package_dir={
+              'languages' : 'languages',
+              'templates' : 'templates'
+    },
+    package_data={
+              'languages' : ['*.tx'],
+              'templates' : ['*.template']
+    },
     install_requires=[
         'Click==6.2',
         'Arpeggio==1.2.1',

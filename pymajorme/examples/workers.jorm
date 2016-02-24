@@ -1,0 +1,25 @@
+// This is the referent syntax example
+
+package = pyma.gen
+context = JSD
+db_name = DB_JSD
+username = jsd
+password = jsd
+
+entity Worker {
+    Integer id [ GUID ]
+    String name
+}
+
+entity Project {
+    Integer id [ GUID ]
+    String name
+}
+
+entity WorkingOnProject {
+    Integer id [ GUID ]
+}
+
+Worker 1-N WorkingOnProject
+WorkingOnProject N-1 Project
+Project as project 1-1 Worker as manager
