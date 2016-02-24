@@ -16,9 +16,9 @@ entity Projekat {
 }
 
 entity RadProj {
-    Integer id [ GUID ]
+
 }
 
 Radnik 1-N RadProj
 RadProj N-1 Projekat
-Projekat as project 1-1 Radnik as menager
+Projekat as project 1-1 Radnik as manager
