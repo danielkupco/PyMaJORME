@@ -15,6 +15,14 @@ import {{import}};
 public class {{entity.name}} implements Serializable {
 
     {# Generating class attributes #}
+    {% if no_guid %}
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    {% endif -%}
+
     {% for attribute in entity.attributes %}
     {# da li postoji atribut ciji je name=GUID, posto se vraca generator pretvara se u listu #}
     {% if attribute.column_parameters|selectattr("name", "equalto", "GUID")|list|count > 0 %}
@@ -61,6 +69,17 @@ public class {{entity.name}} implements Serializable {
         // DO NOT EDIT! Empty constructor must exist!
         // One can add other constructors with parameters...
     }
+
+    {% if no_guid %}
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    {% endif -%}
 
     {% for attribute in entity.attributes %}
     public {{attribute.type|javatype}} get{{attribute.name|title}}() {
