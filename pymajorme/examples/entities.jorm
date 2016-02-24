@@ -18,24 +18,7 @@ entity ElementType {
     String description
 }
 
-entity Radnik {
-    Integer id [ GUID ]
-    String name
-}
+Element 1:1-1:0 ElementType
+ElementType as tuturututu [ cascade = { ALL }, fetch = EAGER : ] 0:1-N Element<list> as mumumumu [ cascade = { PERSIST, REMOVE}, fetch = LAZY : name = typeID, referencedColumnName = id, unique = false]
+ElementType<set> as elementTypes [ cascade = { REMOVE, REFRESH, DETACH }, fetch = EAGER : name = types, nullable = true ] N-N Element<set> as elements [cascade = { PERSIST }, fetch = EAGER : name = elements, nullable = false ]
 
-entity Projekat {
-    Integer id [ GUID ]
-    String name
-}
-
-entity RadProj {
-    Integer id [ GUID ]
-}
-
-//Element 1:1-1:0 ElementType
-//ElementType as tuturututu [ cascade = { ALL }, fetch = EAGER : ] 0:1-N Element<list> as mumumumu [ cascade = { PERSIST, REMOVE}, fetch = LAZY : name = typeID, referencedColumnName = id, unique = false]
-//ElementType<set> as elementTypes [ cascade = { REMOVE, REFRESH, DETACH }, fetch = EAGER : name = types, nullable = true ] N-N Element<set> as elements [cascade = { PERSIST }, fetch = EAGER : name = elements, nullable = false ]
-
-Radnik 1-N RadProj
-RadProj N-1 Projekat
-Projekat as project 1-1 Radnik as menager
