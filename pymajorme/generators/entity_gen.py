@@ -17,6 +17,9 @@ def initialize_imports():
     imports.append('javax.persistence.Table')
     imports.append('javax.persistence.Column')
     imports.append('javax.persistence.JoinColumn')
+    imports.append('javax.persistence.Id')
+    imports.append('javax.persistence.GeneratedValue')
+    imports.append('static javax.persistence.GenerationType.IDENTITY')
 
 
 def add_import(value):
@@ -185,17 +188,20 @@ def generate(model, package_path):
         initialize_imports()
         relation_based_imports(relations, entity)
 
+        no_guid = True
         for attr in entity.attributes:
             if hasattr(attr, 'column_parameters'):
                 for prm in attr.column_parameters:
                     if prm.name == 'GUID':
-                        add_import('javax.persistence.Id')
-                        add_import('javax.persistence.GeneratedValue')
-                        add_import('static javax.persistence.GenerationType.IDENTITY')
+                        no_guid = False
+                        break
+            if not no_guid:
+                break
 
         rendered = template.render({'entity': entity,
                                     'relations': relations,
                                     'date': date,
+                                    'no_guid': no_guid,
                                     'package': package_path_for_template(package_path),
                                     'imports': imports})
 
