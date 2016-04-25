@@ -1,6 +1,7 @@
 # PyMaJORME
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/hyperium/hyper/master/LICENSE)
+[![Python version](https://img.shields.io/badge/python-3.4-orange.svg)](https://www.python.org/)
 
 PyMaJORME is an acronyme for **Py**thon **Ma**kes **J**ava **O**bject-**R**elational **M**apping **E**asy.
 
@@ -10,7 +11,7 @@ PyMaJORME is an easy to use python tool based on DSLs for generating ORM layer f
 
 This project is also used as a final project for *Domain Specific Languages* course taught by Prof. [Igor Dejanović](https://github.com/igordejanovic "Igor Dejanović's GitHub profile") on master studies at *Software Engineering and Informational Technologies* study programme at Faculty of Technical Sciences, University of Novi Sad, Serbia.
 
-PyMaJORME is written in [Python v3](https://www.python.org, "Official Python page"). DSL is built using [Arpeggio](https://github.com/igordejanovic/Arpeggio "Arpeggio GitHub page") and [TextX](https://github.com/igordejanovic/textX "TextX GitHub page") frameworks for language specification. It also uses [Jinja2](https://github.com/mitsuhiko/jinja2 "Jinja 2 GitHub page") for generating output Java code.
+PyMaJORME is written in [Python v3.4](https://www.python.org "Official Python page"). DSL is built using [Arpeggio](https://github.com/igordejanovic/Arpeggio "Arpeggio GitHub page") and [TextX](https://github.com/igordejanovic/textX "TextX GitHub page") frameworks for language specification. It also uses [Jinja2](https://github.com/mitsuhiko/jinja2 "Jinja 2 GitHub page") for generating output Java code.
 
 # Installation
 
