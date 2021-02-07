@@ -2,7 +2,7 @@ Arpeggio==1.2.1
 decorator==4.0.4
 ipython==4.0.1
 ipython-genutils==0.1.0
-Jinja2==2.8
+Jinja2==2.11.3
 MarkupSafe==0.23
 path.py==8.1.2
 pexpect==4.0.1
